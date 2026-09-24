@@ -1571,6 +1571,8 @@ async function showResults(S,{scroll=true,save=true}={}){
   }
   $('sumEyebrow').textContent=eyebrow; $('sumTitle').textContent=title; $('sumMeta').textContent=meta;
   if(S.tab==='vuelos' && S.trip!=='mc'){ provs=provs.filter(p=>p.n!=='Aviasales'); hint=''; }
+  provs = provs.filter(p=>p.aff);
+if(!provs.length) hint = 'Estamos activando más comparadores con comisión — vuelve pronto para ver más opciones aquí.';
   renderWidgets(S);
   $('provHint').textContent=hint; $('provs').innerHTML=provs.map(provHTML).join(''); $('side').innerHTML=side;
   if(S.tab==='hotel'){ const a=$('side').querySelector('a[href="#"]'); if(a){ a.removeAttribute('target'); a.onclick=e=>{ e.preventDefault(); tab='vuelos'; syncTabs(); setSel($('f-to'),null); $('f-to').value=S.to.city; $('f-d1').value=S.d1; $('f-d2').value=S.d2; window.scrollTo({top:0,behavior:'smooth'}); $('f-from').focus(); }; } }

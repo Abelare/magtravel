@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Compara vuelos, trenes, autobuses, hoteles y coches a cualquier ciudad del mundo con precios reales.">
+<title>MAGTravel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;1,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F1E7; --surface:#FFFFFF; --surface2:#FBF8F2; --line:#E6DCC9; --ink:#14263A; --muted:#5E6B78;
+  --sea:#0E3B5C; --sea2:#15557F; --teal:#1C9C95; --teal-ink:#0F6E69; --sun:#F4A53A; --sun-ink:#3F2604; --coral:#D5533D;
+  --on-sea:#FFFFFF; --on-sea-muted:#C4D6E4; --chip:#EFE6D4; --warn-bg:#FFF1D6; --warn-ink:#6B4A12; --ok:#1F7A4D;
+  --shadow:0 10px 30px -18px rgba(14,59,92,.45); --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0B1824; --surface:#132636; --surface2:#172D3F; --line:#23384B; --ink:#EAF0F4; --muted:#9FB0BF;
+    --sea:#0A2C45; --sea2:#1B5E8C; --teal:#2BB5AD; --teal-ink:#5FD3CB; --chip:#1B3043; --warn-bg:#33291A; --warn-ink:#F2D59A; --ok:#5FC08F;
+    --shadow:0 10px 30px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0B1824; --surface:#132636; --surface2:#172D3F; --line:#23384B; --ink:#EAF0F4; --muted:#9FB0BF;
+  --sea:#0A2C45; --sea2:#1B5E8C; --teal:#2BB5AD; --teal-ink:#5FD3CB; --chip:#1B3043; --warn-bg:#33291A; --warn-ink:#F2D59A; --ok:#5FC08F;
+  --shadow:0 10px 30px -18px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:'Manrope',ui-sans-serif,system-ui,sans-serif; font-size:15px; line-height:1.5;}
+.wrap{max-width:1080px; margin:0 auto; padding-inline:16px;}
+a{color:inherit;}
+h2{font-family:'Lora',Georgia,serif; font-weight:600; font-size:1.6rem; line-height:1.2; margin:0; text-wrap:balance;}
+.eyebrow{font-size:.72rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--teal-ink);}
+button{font-family:inherit;}
+:focus-visible{outline:2px solid var(--sun); outline-offset:2px;}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+
+/* ---------- HERO ---------- */
+.hero{position:relative; color:var(--on-sea); background:var(--sea);}
+.hero-art{position:absolute; inset:0; overflow:hidden;}
+.hero-art svg{width:100%; height:100%; display:block;}
+.ph{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;}
+.hero-art::after{content:""; position:absolute; inset:0; z-index:1; background:linear-gradient(100deg,rgba(9,38,62,.8) 0%,rgba(9,38,62,.5) 50%,rgba(9,38,62,.15) 100%);}
+.hero-inner{position:relative; z-index:2; padding-block:1.1rem 2.2rem;}
+.nav{display:flex; justify-content:space-between; align-items:center; gap:1rem;}
+.brand{font-family:'Lora',Georgia,serif; font-style:italic; font-weight:600; font-size:1.6rem; margin:0; color:#fff; text-decoration:none;}
+.navlinks{display:flex; gap:1.1rem; font-size:.88rem; font-weight:700;}
+.navlinks a{text-decoration:none; color:#fff; opacity:.9;}
+@media (max-width:560px){.navlinks{display:none;}}
+.hero h1{font-family:'Lora',Georgia,serif; font-weight:600; font-size:clamp(1.9rem,4.6vw,3rem); line-height:1.08; margin:1.8rem 0 .5rem; max-width:18ch; text-wrap:balance;}
+.hero h1 em{color:#FFE0A8;}
+.hero .lede{max-width:40rem; margin:0 0 1.4rem; color:#EAF2F7;}
+
+/* ---------- SEARCH ---------- */
+.tabs{display:flex; gap:.3rem; overflow-x:auto; scrollbar-width:none;}
+.tab{flex:0 0 auto; display:flex; align-items:center; gap:.45rem; padding:.62rem 1rem; border-radius:12px 12px 0 0;
+  background:rgba(10,35,55,.6); color:#E3EDF4; border:none; cursor:pointer; font:700 .92rem/1 'Manrope',sans-serif;}
+.tab svg{width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+.tab[aria-selected="true"]{background:var(--surface); color:var(--ink);}
+.searchcard{background:var(--surface); color:var(--ink); border-radius:0 16px 16px 16px; padding:1rem 1.1rem 1.1rem; box-shadow:0 20px 50px -20px rgba(0,0,0,.55);}
+.panel[hidden]{display:none!important;}
+.triprow{display:flex; flex-wrap:wrap; gap:.6rem 1.2rem; align-items:center; margin-bottom:.8rem;}
+.seg{display:inline-flex; background:var(--chip); border-radius:999px; padding:3px;}
+.seg label{margin:0; cursor:pointer;}
+.seg input{position:absolute; opacity:0; pointer-events:none;}
+.seg span{display:block; padding:.35rem .85rem; border-radius:999px; font-weight:700; font-size:.85rem; color:var(--muted);}
+.seg span{white-space:nowrap;}
+@media (max-width:420px){.seg span{padding:.35rem .6rem; font-size:.8rem;}}
+.seg input:checked + span{background:var(--surface); color:var(--ink); box-shadow:0 1px 4px rgba(0,0,0,.12);}
+.seg input:focus-visible + span{outline:2px solid var(--sun);}
+.fields{display:grid; grid-template-columns:minmax(0,1.2fr) auto minmax(0,1.2fr) minmax(148px,.9fr) minmax(148px,.9fr) minmax(175px,1fr) auto; gap:.5rem; align-items:end;}
+.fields.hotel{grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.2fr) auto;}
+.fields.car{grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,.7fr) minmax(0,1fr) minmax(0,.7fr) auto;}
+.fields.ground{grid-template-columns:minmax(0,1.2fr) auto minmax(0,1.2fr) minmax(148px,1fr) minmax(148px,1fr) minmax(0,1fr) auto;}
+@media (max-width:980px){
+  .fields,.fields.hotel,.fields.car,.fields.ground{grid-template-columns:1fr 1fr;}
+  .fields .span2,.fields .go{grid-column:1/-1;}
+  .fields .swapcell{display:none;}
+}
+@media (max-width:460px){ .fields,.fields.hotel,.fields.car,.fields.ground{grid-template-columns:1fr;} }
+.field{position:relative; min-width:0;}
+.field label,.flabel{display:block; font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; font-weight:800; color:var(--muted); margin-bottom:.25rem;}
+.field input,.field select,.paxbtn{width:100%; height:46px; padding:0 .75rem; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); font:600 .95rem 'Manrope',sans-serif;}
+.field input:focus,.field select:focus{outline:2px solid var(--sun); outline-offset:0; border-color:transparent;}
+.field input[disabled]{opacity:.45;}
+.field .hint{position:absolute; right:.6rem; top:1.75rem; font-size:.72rem; font-weight:800; color:var(--teal-ink); background:var(--chip); padding:.1rem .4rem; border-radius:6px; pointer-events:none;}
+.swap{width:38px; height:38px; margin-bottom:4px; border-radius:50%; border:1px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; display:grid; place-items:center;}
+.swap svg{width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+.swap:hover{background:var(--chip);}
+.gobtn{height:46px; padding:0 1.5rem; border:none; border-radius:10px; background:var(--sun); color:var(--sun-ink); font-weight:800; font-size:1rem; cursor:pointer; white-space:nowrap; width:100%;}
+.gobtn:hover{filter:brightness(1.05);}
+.opts{display:flex; flex-wrap:wrap; gap:.4rem 1.2rem; margin-top:.75rem; font-size:.88rem;}
+.opts label{display:flex; align-items:center; gap:.4rem; cursor:pointer; color:var(--ink); font-weight:600;}
+.opts input{width:17px; height:17px; accent-color:var(--teal);}
+.err{color:var(--coral); font-weight:700; font-size:.88rem; margin:.6rem 0 0;}
+.err:empty{display:none;}
+/* multidestino */
+.legs{display:flex; flex-direction:column; gap:.5rem;}
+.leg{display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1.3fr) minmax(0,1fr) auto; gap:.5rem; align-items:end;}
+@media (max-width:760px){.leg{grid-template-columns:1fr 1fr;} .leg .field:nth-child(3){grid-column:1/2;}}
+.legdel{height:46px; width:46px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--muted); cursor:pointer; font-size:1.2rem;}
+.legbar{display:flex; flex-wrap:wrap; gap:.5rem; align-items:end; margin-top:.5rem;}
+.linkbtn{background:none; border:none; color:var(--teal-ink); font-weight:800; cursor:pointer; padding:.5rem 0; font-size:.92rem;}
+/* pasajeros */
+.pax{position:relative;}
+.paxbtn{text-align:left; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.paxpanel{position:absolute; z-index:30; right:0; top:calc(100% + 6px); width:min(320px,86vw); background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); padding:.9rem;}
+.paxpanel[hidden]{display:none;}
+.prow{display:flex; justify-content:space-between; align-items:center; gap:.8rem; padding:.45rem 0;}
+.prow b{display:block; font-size:.92rem;}
+.prow small{color:var(--muted); font-size:.78rem;}
+.step{display:flex; align-items:center; gap:.5rem;}
+.step button{width:32px; height:32px; border-radius:50%; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-size:1.1rem; cursor:pointer;}
+.step button:disabled{opacity:.35; cursor:default;}
+.step output{min-width:1.2rem; text-align:center; font-weight:800; font-variant-numeric:tabular-nums;}
+.paxpanel select{width:100%; height:40px; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink); font:600 .9rem 'Manrope',sans-serif; margin-top:.3rem;}
+.paxdone{margin-top:.7rem; width:100%; height:38px; border:none; border-radius:8px; background:var(--sea2); color:#fff; font-weight:800; cursor:pointer;}
+/* autocompletado */
+.ac{position:absolute; z-index:40; left:0; top:calc(100% + 4px); width:max(100%,340px); max-width:92vw; background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); padding:.35rem; max-height:360px; overflow:auto; list-style:none; margin:0;}
+.ac[hidden]{display:none;}
+.ac .grp{font-size:.68rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); padding:.5rem .6rem .2rem;}
+.ac .opt{display:grid; grid-template-columns:28px 1fr auto; gap:.55rem; align-items:center; padding:.5rem .6rem; border-radius:8px; cursor:pointer;}
+.ac .opt[aria-selected="true"],.ac .opt:hover{background:var(--chip);}
+.ac .opt.sub{padding-left:1.6rem;}
+.ac .ico{width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--surface2); color:var(--teal-ink);}
+.ac .ico svg{width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+.ac .t1{font-weight:700; font-size:.92rem; line-height:1.25;}
+.ac .t2{font-size:.78rem; color:var(--muted); line-height:1.25;}
+.ac .code{font-weight:800; font-size:.8rem; color:var(--teal-ink); font-variant-numeric:tabular-nums;}
+.ac .note{padding:.6rem; color:var(--muted); font-size:.85rem;}
+/* recientes */
+.recent{display:flex; flex-wrap:wrap; gap:.4rem; align-items:center; margin-top:.9rem; font-size:.82rem; color:#DCE7EF;}
+.recent[hidden]{display:none;}
+.rchip{border:1px solid rgba(255,255,255,.35); background:rgba(10,35,55,.45); color:#fff; border-radius:999px; padding:.3rem .75rem; font:700 .8rem 'Manrope',sans-serif; cursor:pointer;}
+.rchip:hover{background:rgba(10,35,55,.75);}
+
+/* ---------- RESULTS ---------- */
+section{padding-block:2rem 0;}
+#resultados[hidden]{display:none;}
+.summary{display:flex; flex-wrap:wrap; justify-content:space-between; gap:.8rem 1rem; align-items:flex-end; margin-bottom:1rem;}
+.summary h2{font-size:1.5rem;}
+.summary .meta{color:var(--muted); font-size:.9rem; margin-top:.25rem;}
+.summary .acts{display:flex; gap:.5rem;}
+.ghost{border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:.45rem .9rem; font:700 .85rem 'Manrope',sans-serif; cursor:pointer;}
+.ghost:hover{background:var(--chip);}
+.airports{display:flex; flex-wrap:wrap; gap:.4rem; align-items:center; margin:-.2rem 0 1rem; font-size:.85rem; color:var(--muted);}
+.apchip{border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:.3rem .7rem; font:700 .8rem 'Manrope',sans-serif; cursor:pointer;}
+.apchip[aria-pressed="true"]{background:var(--sea2); border-color:var(--sea2); color:#fff;}
+.grid2{display:grid; grid-template-columns:minmax(0,1.75fr) minmax(0,1fr); gap:1.2rem; align-items:start;}
+@media (max-width:900px){.grid2{grid-template-columns:1fr;}}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);}
+.provlist{display:flex; flex-direction:column; gap:.6rem;}
+.prov{display:grid; grid-template-columns:1fr auto; gap:.4rem 1rem; align-items:center; padding:1rem 1.1rem;}
+.prov .pname{font-weight:800; font-size:1.05rem; display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;}
+.prov .ptag{font-size:.86rem; color:var(--muted);}
+.prov .caps{grid-column:1/-1; display:flex; flex-wrap:wrap; gap:.3rem; font-size:.74rem;}
+.cap{padding:.12rem .5rem; border-radius:999px; background:var(--chip); font-weight:700;}
+.cap.no{background:transparent; border:1px dashed var(--line); color:var(--muted); font-weight:600;}
+.badge{display:inline-block; font-size:.66rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; background:var(--sun); color:var(--sun-ink); padding:.12rem .5rem; border-radius:999px;}
+.badge.soft{background:var(--chip); color:var(--ink);}
+.gobook{display:inline-flex; align-items:center; gap:.35rem; padding:.6rem 1rem; border-radius:10px; background:var(--sea2); color:#fff; font-weight:800; font-size:.9rem; text-decoration:none; white-space:nowrap;}
+.gobook:hover{filter:brightness(1.12);}
+.gobook.alt{background:var(--teal);}
+@media (max-width:520px){.prov{grid-template-columns:1fr;} .gobook{justify-content:center;}}
+.hintbox:empty{display:none;}
+.hintbox{padding:.8rem 1rem; border-radius:10px; background:var(--warn-bg); color:var(--warn-ink); font-size:.86rem; margin:0 0 .8rem;}
+.side{display:flex; flex-direction:column; gap:1rem;}
+.side .card{padding:1rem 1.1rem;}
+.side h3{margin:0 0 .6rem; font-size:1rem; font-weight:800;}
+.kv{display:grid; grid-template-columns:auto 1fr; gap:.35rem .9rem; font-size:.9rem;}
+.kv dt{color:var(--muted);}
+.kv dd{margin:0; font-weight:700; text-align:right; font-variant-numeric:tabular-nums;}
+.xsell{display:flex; flex-direction:column; gap:.45rem;}
+.xsell a{display:flex; justify-content:space-between; align-items:center; gap:.6rem; padding:.6rem .7rem; border:1px solid var(--line); border-radius:10px; text-decoration:none; font-weight:700; font-size:.9rem;}
+.xsell a:hover{background:var(--chip);}
+.xsell a small{display:block; color:var(--muted); font-weight:600; font-size:.78rem;}
+.xsell .arr{color:var(--teal-ink); font-weight:800;}
+.prices{padding:1rem 1.1rem; margin-bottom:.8rem;}
+.prices h3{margin:0 0 .2rem; font-size:1rem;}
+.prices .sub{color:var(--muted); font-size:.82rem; margin:0 0 .6rem;}
+.prow2{display:grid; grid-template-columns:1fr auto auto; gap:.8rem; align-items:center; padding:.55rem 0; border-top:1px solid var(--line); font-size:.9rem;}
+.prow2 .pp{font-weight:800; font-size:1.1rem; font-variant-numeric:tabular-nums;}
+.loading::before{content:""; display:inline-block; width:14px; height:14px; margin-right:.5rem; vertical-align:-2px; border:2px solid var(--line); border-top-color:var(--teal); border-radius:50%; animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.realp{padding:1.1rem 1.2rem; margin-bottom:.8rem; border:2px solid var(--sun);}
+.realhead{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:.8rem 1.2rem;}
+.realp h3{margin:.15rem 0 .2rem; font-size:1.2rem; font-weight:800;}
+.realp p{margin:0; color:var(--muted); font-size:.9rem; max-width:44ch;}
+.gobook.big{padding:.8rem 1.3rem; font-size:1rem; background:var(--sun); color:var(--sun-ink);}
+.tpcard{padding:1rem 1.1rem; margin-bottom:.8rem; overflow:hidden;}
+.tpcard h3{margin:0; font-size:1rem; font-weight:800;}
+.tpcard .sub{margin:.1rem 0 .7rem; color:var(--muted); font-size:.85rem;}
+.tpbox{min-height:60px; max-width:100%; overflow-x:auto;}
+#provs:not(:empty)::before{content:"Comparar también en"; display:block; font-size:.72rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--teal-ink); margin:.4rem 0 .1rem;}
+.deals{display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;}
+@media (max-width:860px){.deals{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:520px){.deals{grid-template-columns:1fr;}}
+.deal{position:relative; display:block; width:100%; padding:0; border:none; border-radius:16px; overflow:hidden; cursor:pointer; text-align:left; background:var(--sea); aspect-ratio:4/3; max-width:100%; box-shadow:var(--shadow); color:#fff; font-family:inherit; transition:transform .2s;}
+.deal:hover{transform:translateY(-3px);}
+.deal svg{position:absolute; inset:0; width:100%; height:100%;}
+.deal .dcap{position:absolute; z-index:2; left:0; right:0; bottom:0; padding:2.6rem 1rem .95rem; background:linear-gradient(transparent,rgba(6,22,36,.88));}
+.deal .dcap > b{display:block; font-family:'Lora',Georgia,serif; font-size:1.35rem; font-weight:600; line-height:1.15;}
+.deal .dcap .why{display:block; font-size:.85rem; opacity:.92; margin-top:.15rem;}
+.deal .row{display:flex; justify-content:space-between; align-items:center; gap:.6rem; margin-top:.6rem; font-size:.78rem; font-weight:700;}
+.deal .pill{background:rgba(255,255,255,.18); padding:.2rem .55rem; border-radius:999px; white-space:nowrap;}
+.deal .cta{background:var(--sun); color:var(--sun-ink); padding:.3rem .7rem; border-radius:999px; white-space:nowrap;}
+.dealnote{font-size:.8rem; color:var(--muted); margin:.7rem 0 0;}
+.dealnote:empty{display:none;}
+.deal .cta b{font-size:1rem; font-weight:800;}
+.deal .flag{position:absolute; z-index:2; top:.7rem; left:.7rem; background:rgba(255,255,255,.92); color:#14263A; font-size:.72rem; font-weight:800; padding:.2rem .55rem; border-radius:999px;}
+/* ---------- THINGS TO DO ---------- */
+.todo{display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;}
+@media (max-width:820px){.todo{grid-template-columns:1fr;}}
+.spot{background:var(--surface); border:1px solid var(--line); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; box-shadow:var(--shadow);}
+.spot .art{aspect-ratio:16/10; max-width:100%; position:relative; overflow:hidden;}
+.spot .art svg{width:100%; height:100%; display:block;}
+.spot .rank{position:absolute; z-index:2; top:.7rem; left:.7rem; background:rgba(255,255,255,.92); color:#14263A; font-weight:800; font-size:.75rem; padding:.2rem .55rem; border-radius:999px;}
+.spot .body{padding:1rem 1.1rem 1.1rem; display:flex; flex-direction:column; gap:.4rem; flex:1;}
+.spot h3{margin:0; font-size:1.05rem; font-weight:800;}
+.spot p{margin:0; color:var(--muted); font-size:.9rem; flex:1;}
+.spot .facts{display:flex; gap:.4rem; flex-wrap:wrap; font-size:.75rem;}
+.spot .facts span{background:var(--chip); border-radius:999px; padding:.15rem .55rem; font-weight:700;}
+.spotlinks{display:flex; align-items:center; gap:.9rem; flex-wrap:wrap; margin-top:.4rem;}
+.spotlinks .gobook{background:var(--teal); padding:.5rem .9rem; font-size:.85rem;}
+.maplink{font-size:.85rem; font-weight:800; color:var(--teal-ink);}
+.skeleton .art{background:linear-gradient(90deg,var(--chip),var(--line),var(--chip)); background-size:200% 100%; animation:shimmer 1.4s infinite;}
+.skeleton h3,.skeleton p{background:var(--chip); border-radius:6px; color:transparent;}
+@keyframes shimmer{to{background-position:-200% 0}}
+.cityintro{color:var(--muted); max-width:62ch; margin:.4rem 0 1rem;}
+
+/* ---------- HOME ---------- */
+.steps{display:grid; grid-template-columns:repeat(3,1fr); gap:1.4rem; margin-top:1rem;}
+@media (max-width:760px){.steps{grid-template-columns:1fr;}}
+.steps b{display:block; font-size:1rem; margin-bottom:.2rem;}
+.steps p{margin:0; color:var(--muted); font-size:.92rem;}
+.steps .n{display:inline-grid; place-items:center; width:30px; height:30px; border-radius:50%; background:var(--sea2); color:#fff; font-weight:800; margin-bottom:.5rem;}
+.tips{display:grid; grid-template-columns:repeat(2,1fr); gap:.8rem; margin-top:1rem;}
+@media (max-width:760px){.tips{grid-template-columns:1fr;}}
+.tip{padding:1rem 1.1rem;}
+.tip b{display:block; margin-bottom:.2rem;}
+.tip p{margin:0; color:var(--muted); font-size:.9rem;}
+.explore{display:flex; flex-wrap:wrap; gap:.6rem; margin-top:1rem;}
+.explore .gobook{white-space:normal; max-width:100%;}
+
+footer{margin-top:3rem; background:var(--sea); color:var(--on-sea-muted); font-size:.82rem;}
+footer .wrap{padding-block:1.6rem; display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;}
+footer p{margin:0; max-width:60ch;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important;}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-art" id="heroArt"></div>
+  <div class="wrap hero-inner">
+    <div class="nav">
+      <a class="brand" href="./">MAGTravel</a>
+      <nav class="navlinks"><a href="#como">Cómo funciona</a><a href="#consejos">Consejos</a></nav>
+    </div>
+    <h1>Compara todos los buscadores de viaje. <em>Reserva donde sea más barato.</em></h1>
+    <p class="lede">Vuelos, trenes, autobuses, hoteles y coches a cualquier ciudad del mundo. Buscas una vez aquí y comparas en Skyscanner, Kayak, Aviasales, Google y más, con tu búsqueda ya rellenada.</p>
+
+    <div class="tabs" role="tablist" id="tabs" aria-label="Qué quieres buscar"></div>
+    <form class="searchcard" id="searchForm" novalidate>
+      <!-- VUELOS -->
+      <div class="panel" id="p-vuelos" role="tabpanel">
+        <div class="triprow">
+          <div class="seg" role="radiogroup" aria-label="Tipo de viaje">
+            <label><input type="radio" name="trip" id="trip-rt" value="rt" checked><span>Ida y vuelta</span></label>
+            <label><input type="radio" name="trip" id="trip-ow" value="ow"><span>Solo ida</span></label>
+            <label><input type="radio" name="trip" id="trip-mc" value="mc"><span>Multidestino</span></label>
+          </div>
+        </div>
+        <div class="fields" id="simpleLeg">
+          <div class="field"><label for="f-from">Origen</label><input id="f-from" data-mode="air" placeholder="Ciudad o aeropuerto" autocomplete="off"></div>
+          <div class="swapcell"><button type="button" class="swap" id="swapBtn" aria-label="Intercambiar origen y destino"><svg viewBox="0 0 24 24"><path d="M7 7h13l-3-3M17 17H4l3 3"/></svg></button></div>
+          <div class="field"><label for="f-to">Destino</label><input id="f-to" data-mode="air" placeholder="Ciudad, aeropuerto o país" autocomplete="off"></div>
+          <div class="field"><label for="f-d1">Ida</label><input id="f-d1" type="date"></div>
+          <div class="field"><label for="f-d2">Vuelta</label><input id="f-d2" type="date"></div>
+          <div class="field pax span2" id="paxF"></div>
+          <div class="go"><button class="gobtn" type="submit">Buscar vuelos</button></div>
+        </div>
+        <div id="multiLegs" hidden>
+          <div class="legs" id="legs"></div>
+          <div class="legbar">
+            <button type="button" class="linkbtn" id="addLeg">+ Añadir trayecto</button>
+            <div class="field pax" id="paxM" style="min-width:220px"></div>
+            <div style="min-width:180px"><button class="gobtn" type="submit">Buscar vuelos</button></div>
+          </div>
+        </div>
+        <div class="opts">
+          <label><input type="checkbox" id="o-direct"> Solo vuelos directos</label>
+          <label><input type="checkbox" id="o-flex"> Fechas flexibles (±3 días)</label>
+          <label><input type="checkbox" id="o-near"> Incluir aeropuertos cercanos</label>
+        </div>
+      </div>
+      <!-- TRENES Y AUTOBUSES -->
+      <div class="panel" id="p-tierra" role="tabpanel" hidden>
+        <div class="fields ground">
+          <div class="field"><label for="g-from">Origen</label><input id="g-from" data-mode="place" placeholder="Ciudad o estación" autocomplete="off"></div>
+          <div class="swapcell"><button type="button" class="swap" id="gswapBtn" aria-label="Intercambiar origen y destino"><svg viewBox="0 0 24 24"><path d="M7 7h13l-3-3M17 17H4l3 3"/></svg></button></div>
+          <div class="field"><label for="g-to">Destino</label><input id="g-to" data-mode="place" placeholder="Ciudad o estación" autocomplete="off"></div>
+          <div class="field"><label for="g-d1">Ida</label><input id="g-d1" type="date"></div>
+          <div class="field"><label for="g-d2">Vuelta (opcional)</label><input id="g-d2" type="date"></div>
+          <div class="field"><label for="g-pax">Pasajeros</label><select id="g-pax"></select></div>
+          <div class="go"><button class="gobtn" type="submit">Buscar</button></div>
+        </div>
+        <div class="opts"><label><input type="checkbox" id="g-train" checked> Tren</label><label><input type="checkbox" id="g-bus" checked> Autobús</label><label><input type="checkbox" id="g-ferry" checked> Ferri</label><label><input type="checkbox" id="g-car" checked> Coche compartido</label></div>
+      </div>
+      <!-- HOTELES -->
+      <div class="panel" id="p-hotel" role="tabpanel" hidden>
+        <div class="fields hotel">
+          <div class="field"><label for="h-to">Destino</label><input id="h-to" data-mode="place" placeholder="Ciudad, barrio o lugar" autocomplete="off"></div>
+          <div class="field"><label for="h-d1">Entrada</label><input id="h-d1" type="date"></div>
+          <div class="field"><label for="h-d2">Salida</label><input id="h-d2" type="date"></div>
+          <div class="field pax" id="paxH"></div>
+          <div class="go"><button class="gobtn" type="submit">Buscar hoteles</button></div>
+        </div>
+      </div>
+      <!-- COCHES -->
+      <div class="panel" id="p-coche" role="tabpanel" hidden>
+        <div class="fields car">
+          <div class="field"><label for="c-at">Lugar de recogida</label><input id="c-at" data-mode="air" placeholder="Ciudad o aeropuerto" autocomplete="off"></div>
+          <div class="field"><label for="c-d1">Recogida</label><input id="c-d1" type="date"></div>
+          <div class="field"><label for="c-t1">Hora</label><select id="c-t1"></select></div>
+          <div class="field"><label for="c-d2">Devolución</label><input id="c-d2" type="date"></div>
+          <div class="field"><label for="c-t2">Hora</label><select id="c-t2"></select></div>
+          <div class="go"><button class="gobtn" type="submit">Buscar coches</button></div>
+        </div>
+      </div>
+      <p class="err" id="formErr" role="alert"></p>
+    </form>
+    <div class="recent" id="recent" hidden></div>
+  </div>
+</div>
+
+<main class="wrap">
+  <section id="resultados" hidden aria-live="polite">
+    <div class="summary">
+      <div><div class="eyebrow" id="sumEyebrow"></div><h2 id="sumTitle"></h2><div class="meta" id="sumMeta"></div></div>
+      <div class="acts"><button type="button" class="ghost" id="editBtn">Modificar búsqueda</button><button type="button" class="ghost" id="shareBtn">Copiar enlace</button></div>
+    </div>
+    <div class="airports" id="apPick"></div>
+    <div class="grid2">
+      <div>
+        <div id="livePrices"></div>
+        <div id="tpWidgets"></div>
+        <p class="hintbox" id="provHint"></p>
+        <div class="provlist" id="provs"></div>
+      </div>
+      <aside class="side" id="side"></aside>
+    </div>
+  </section>
+
+  <section id="quehacer" hidden>
+    <div class="eyebrow">Qué ver al llegar</div><h2 id="todoTitle"></h2><p class="cityintro" id="todoIntro"></p>
+    <div class="todo" id="todo"></div>
+  </section>
+
+  <section id="baratos">
+    <div class="eyebrow">¿No sabes adónde ir?</div><h2>Escapadas baratas desde Madrid</h2>
+    <p class="cityintro">Destinos con muchos vuelos directos y compañías low cost desde Madrid-Barajas. Pulsa uno para ver los precios reales y el calendario de cada día.</p>
+    <div class="deals" id="deals"></div>
+    <p class="dealnote" id="dealNote"></p>
+  </section>
+
+  <section id="como">
+    <div class="eyebrow">Cómo funciona</div><h2>Un buscador que busca en los buscadores</h2>
+    <div class="steps">
+      <div><span class="n">1</span><b>Busca una vez</b><p>Cualquier ciudad, aeropuerto o país del mundo. Te sugerimos el aeropuerto que sirve a cada destino, con su código.</p></div>
+      <div><span class="n">2</span><b>Compara en todos a la vez</b><p>Abrimos tu búsqueda ya rellenada en los grandes comparadores. Cada uno trabaja con aerolíneas y agencias distintas.</p></div>
+      <div><span class="n">3</span><b>Reserva en la web oficial</b><p>Pagas directamente a la aerolínea, la agencia o el hotel. MAGTravel no cobra comisión ni recargo.</p></div>
+    </div>
+  </section>
+
+  <section id="consejos">
+    <div class="eyebrow">Consejos</div><h2>Cómo encontrar vuelos más baratos</h2>
+    <div class="tips">
+      <div class="card tip"><b>Compara al menos dos buscadores</b><p>Los precios cambian entre comparadores porque no todos trabajan con las mismas agencias. La diferencia puede ser de decenas de euros.</p></div>
+      <div class="card tip"><b>Activa las fechas flexibles</b><p>Salir un día antes o después suele cambiar el precio más que cualquier otro truco. Marca «Fechas flexibles» al buscar.</p></div>
+      <div class="card tip"><b>Mira aeropuertos cercanos</b><p>Londres, París, Roma o Nueva York tienen varios aeropuertos. Uno secundario, a veces más lejos del centro, puede salir mucho más barato.</p></div>
+      <div class="card tip"><b>Revisa el equipaje antes de pagar</b><p>Las tarifas básicas no siempre incluyen maleta ni elegir asiento. Compara el precio final, no el primero que aparece.</p></div>
+    </div>
+    
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>MAGTravel es un comparador independiente: no vende billetes ni paquetes. Al pulsar un botón vas a la web del buscador o proveedor y reservas allí. Algunos enlaces son de afiliado: si compras, podemos recibir una comisión sin coste extra para ti.</p>
+    <p>© 2026 MAGTravel · Aviso legal · Privacidad · Cookies<br>Datos de aeropuertos y destinos: <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a> y <a href="https://es.wikipedia.org/" target="_blank" rel="noopener">Wikipedia</a> (CC BY-SA).</p>
+  </div>
+</footer>
+
+<script>
+/* =========================================================
+   CONFIGURACIÓN — pega aquí tus IDs de afiliado cuando te aprueben.
+   Vacíos = los enlaces funcionan igual, pero sin comisión.
+   ========================================================= */
+const CONFIG = {
+  travelpayoutsMarker: '781109',   // Travelpayouts → "Marker": comisión en Aviasales y Hotellook
+  // Widget «Formulario de búsqueda» de Aviasales (tu código de Travelpayouts). Se muestra en los resultados de vuelos.
+  aviasalesWidget: 'https://tpemb.com/content?currency=eur&trs=577266&shmarker=781109&show_hotels=true&powered_by=true&locale=es&searchUrl=www.aviasales.com%2Fsearch&primary_override=%2315557F&color_button=%23F4A53A&color_icons=%2332a8dd&dark=%23262626&light=%23FFFFFF&secondary=%23FFFFFF&special=%23C4C4C4&color_focused=%2332a8dd&border_radius=0&plain=false&promo_id=7879&campaign_id=100',
+  // Widget «Calendario de precios» (opcional): pega aquí su dirección (lo que va dentro de src="...")
+  calendarWidget: 'https://tpemb.com/content?currency=eur&trs=577266&shmarker=781109&searchUrl=www.aviasales.com%2Fsearch&locale=es&powered_by=true&one_way=false&only_direct=false&period=year&range=7%2C14&primary=%2315557F&color_background=%23ffffff&dark=%23262626&light=%23FFFFFF&achieve=%2345AD35&promo_id=4041&campaign_id=100',
+  // Precios reales: los da la función de Netlify /api/precios (tu token de Travelpayouts va en Netlify, nunca aquí)
+  pricesApi:           '/api/precios',
+  bookingAid:          '',   // Booking.com afiliados → "aid"
+  getyourguideId:      '',   // GetYourGuide afiliados → "partner_id"
+  civitatisAid:        '',   // Civitatis afiliados → "aid"
+  omioPartnerId:       '',   // Omio afiliados
+  directFerriesId:     '',   // Direct Ferries afiliados
+  discoverCarsId:      ''    // DiscoverCars afiliados → "a_aid"
+};
+/* ---------- utilidades ---------- */
+const $ = id => document.getElementById(id);
+const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function rng(seed){ let h=2166136261; for(const c of seed){h^=c.charCodeAt(0); h=Math.imul(h,16777619);} return ()=>{h^=h<<13;h^=h>>>17;h^=h<<5;return ((h>>>0)%10000)/10000;}; }
+
+/* ---------- ilustraciones (estilo póster de viaje) ---------- */
+const SVG = (inner, sky=['#F9C784','#F48C5A']) => `<svg viewBox="0 0 300 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<defs><linearGradient id="g${sky.join('').replace(/#/g,'')}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient></defs>
+<rect width="300" height="200" fill="url(#g${sky.join('').replace(/#/g,'')})"/>${inner}</svg>`;
+const sea = (y,c1='#1C9C95',c2='#0E3B5C') => `<rect y="${y}" width="300" height="${200-y}" fill="${c1}"/><rect y="${y+18}" width="300" height="${200-y}" fill="${c2}" opacity=".55"/>
+<path d="M0 ${y+8} q10 -4 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" stroke="#fff" stroke-width="1.4" fill="none" opacity=".45"/>`;
+const sun = (x,y,r,c='#FFE3A3') => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/>`;
+const palm = (x,y,s=1) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 0 C4 -30 10 -55 20 -75" stroke="#3C2A1A" stroke-width="5" fill="none" stroke-linecap="round"/>
+<g fill="#1F5E3A"><path d="M20 -75 C0 -85 -18 -78 -28 -64 C-10 -74 5 -74 20 -75z"/><path d="M20 -75 C38 -90 58 -84 66 -70 C50 -78 36 -78 20 -75z"/><path d="M20 -75 C12 -100 30 -110 44 -108 C30 -100 24 -90 20 -75z"/><path d="M20 -75 C5 -95 -14 -98 -22 -92 C-6 -90 8 -86 20 -75z"/><path d="M20 -75 C36 -70 44 -54 44 -40 C36 -54 28 -64 20 -75z"/></g></g>`;
+const boat = (x,y) => `<g transform="translate(${x} ${y})"><path d="M0 0 h34 l-6 7 h-22z" fill="#FFFFFF"/><path d="M16 -1 v-26 l14 24z" fill="#FFF6E5"/><path d="M15 -1 v-20 l-11 20z" fill="#E0604A"/></g>`;
+
+const ART = {
+  playa: () => SVG(sun(220,70,26)+`<path d="M0 118 C60 104 120 112 170 108 S260 100 300 106 V200 H0z" fill="#2A8C8A" opacity=".5"/>`+sea(118)+
+    `<path d="M0 168 C70 150 150 158 300 150 V200 H0z" fill="#F3DDB1"/>`+palm(40,170,.9)+boat(170,128),['#8FD3E8','#F6D7A7']),
+  roma: () => { let a=''; for(let r=0;r<3;r++){ for(let i=0;i<9;i++){ a+=`<path d="M${62+i*20} ${150-r*28} v-14 a7 7 0 0 1 14 0 v14z" fill="#7A3B1F" opacity=".75"/>`; } }
+    return SVG(sun(70,62,22,'#FFE0A8')+`<path d="M52 160 V70 Q150 58 248 76 V160z" fill="#D98A4E"/><path d="M200 160 V74 Q228 76 248 60 V160z" fill="#B96A38"/>`+a+
+    `<rect x="52" y="66" width="196" height="4" fill="#B96A38"/><rect y="160" width="300" height="40" fill="#6E4A2E"/><path d="M0 160 h300" stroke="#F4C58A" stroke-width="2"/>
+    <g fill="#2D4A2B"><ellipse cx="20" cy="150" rx="10" ry="22"/><ellipse cx="280" cy="148" rx="9" ry="24"/></g>`,['#F9B97A','#E86F52']); },
+  paris: () => SVG(sun(230,58,20,'#FFF1CF')+`<path d="M150 22 L156 70 L172 130 L190 180 H170 Q150 150 130 180 H110 L128 130 L144 70z" fill="#3B3F55"/>
+    <rect x="138" y="70" width="24" height="5" fill="#3B3F55"/><rect x="126" y="126" width="48" height="6" fill="#3B3F55"/><path d="M150 16 v8" stroke="#3B3F55" stroke-width="3"/>
+    <rect y="180" width="300" height="20" fill="#5E7A4A"/><g fill="#6A8C54"><circle cx="40" cy="178" r="14"/><circle cx="70" cy="182" r="11"/><circle cx="250" cy="178" r="15"/><circle cx="222" cy="183" r="10"/></g>`,['#B9D4EE','#F4C6B8']),
+  londres: () => SVG(`<rect x="130" y="60" width="40" height="120" fill="#C9A56A"/><path d="M126 60 L150 20 L174 60z" fill="#4A5B6E"/><circle cx="150" cy="80" r="12" fill="#FFF7E3" stroke="#6D5530" stroke-width="2"/>
+    <path d="M150 80 v-7 M150 80 h5" stroke="#333" stroke-width="1.6"/><g fill="#A6864F">`+[0,1,2,3,4].map(i=>`<rect x="136" y="${100+i*15}" width="6" height="9"/><rect x="158" y="${100+i*15}" width="6" height="9"/>`).join('')+`</g>
+    <rect x="0" y="130" width="130" height="50" fill="#B69256"/><rect x="170" y="130" width="130" height="50" fill="#B69256"/>`+sea(176,'#4F7FA0','#2F5775')+
+    `<rect x="40" y="150" width="30" height="16" rx="3" fill="#C8372D"/><circle cx="46" cy="167" r="3" fill="#222"/><circle cx="64" cy="167" r="3" fill="#222"/>`,['#C7D5E2','#E9D6C0']),
+  lisboa: () => { const cols=['#F2C14E','#E7866A','#8DB8D6','#F4E9D8','#E0604A','#9CC7A4']; let h='';
+    for(let i=0;i<10;i++){ const x=i*32, y=90+Math.abs(5-i)*9; h+=`<rect x="${x}" y="${y}" width="30" height="${200-y}" fill="${cols[i%6]}"/><path d="M${x-2} ${y} L${x+15} ${y-12} L${x+32} ${y}z" fill="#B8543A"/><rect x="${x+8}" y="${y+12}" width="6" height="8" fill="#fff" opacity=".7"/><rect x="${x+18}" y="${y+12}" width="6" height="8" fill="#fff" opacity=".7"/>`; }
+    return SVG(sun(250,50,18,'#FFF1CF')+h+`<rect x="95" y="150" width="90" height="36" rx="6" fill="#F2B632"/><rect x="102" y="157" width="14" height="12" fill="#DDEAF2"/><rect x="122" y="157" width="14" height="12" fill="#DDEAF2"/><rect x="142" y="157" width="14" height="12" fill="#DDEAF2"/><rect x="162" y="157" width="14" height="12" fill="#DDEAF2"/><rect x="95" y="176" width="90" height="4" fill="#B5832A"/><path d="M140 150 l-10 -22" stroke="#333" stroke-width="1.5"/><rect y="186" width="300" height="14" fill="#6B6B6B"/>`,['#9ED0EA','#F7E3C2']); },
+  tenerife: () => SVG(`<path d="M20 150 L130 40 L150 36 L170 42 L290 150z" fill="#8A6A5A"/><path d="M112 58 L130 40 L150 36 L170 42 L190 60 L172 56 L158 64 L144 54 L128 62z" fill="#FFFFFF"/>`+sea(150)+`<path d="M200 200 C220 170 260 164 300 166 V200z" fill="#3A3330"/>`+boat(60,158),['#86C3E3','#F1D0A6']),
+  amsterdam: () => { const cols=['#7A3B28','#3E4C5E','#A65A3A','#2F4A3F','#8C6E4A','#5A3326','#3E4C5E','#A65A3A']; let h='';
+    for(let i=0;i<8;i++){ const x=6+i*36, top=58+(i%3)*10; h+=`<path d="M${x} 150 V${top+14} h6 v-8 h6 v-8 h10 v8 h6 v8 h6 V150z" fill="${cols[i]}"/>`+[0,1,2].map(r=>`<rect x="${x+8}" y="${top+26+r*22}" width="7" height="12" fill="#F6E7C8"/><rect x="${x+20}" y="${top+26+r*22}" width="7" height="12" fill="#F6E7C8"/>`).join(''); }
+    return SVG(h+sea(150,'#3F6F8A','#23475E')+`<path d="M100 150 a50 30 0 0 1 100 0" fill="none" stroke="#6E4A2E" stroke-width="7"/>`+`<circle cx="60" cy="178" r="6" fill="none" stroke="#222" stroke-width="2"/><circle cx="80" cy="178" r="6" fill="none" stroke="#222" stroke-width="2"/><path d="M60 178 l8 -10 h10 l2 10 M68 168 l-2 -4" stroke="#222" stroke-width="2" fill="none"/>`,['#BCD7E6','#EFE1CB']); },
+  barcelona: () => SVG(sun(60,50,18,'#FFF1CF')+[110,130,165,185].map((x,i)=>`<path d="M${x} 150 V${60+(i%2)*14} q7 -30 14 0 V150z" fill="#C49A6C"/><circle cx="${x+7}" cy="${46+(i%2)*14}" r="4" fill="#E0604A"/>`).join('')+
+    `<rect x="100" y="120" width="110" height="40" fill="#B08658"/><path d="M140 120 a15 18 0 0 1 30 0" fill="#7A5634"/>`+sea(160)+palm(260,178,.7),['#A8D8EE','#F8D9A8']),
+  madrid: () => SVG(sun(240,55,20,'#FFF1CF')+`<rect x="40" y="110" width="220" height="60" fill="#E8D5B0"/><path d="M40 110 h220 l-10 -10 h-200z" fill="#C9B38A"/>`+[0,1,2,3,4,5,6,7,8].map(i=>`<rect x="${52+i*23}" y="122" width="10" height="36" fill="#9C8560"/>`).join('')+
+    `<rect x="136" y="70" width="28" height="32" fill="#E8D5B0"/><path d="M130 72 L150 50 L170 72z" fill="#5E7A8C"/><rect y="170" width="300" height="30" fill="#8A6A48"/>`,['#9CC6E8','#F4D6B0']),
+  sevilla: () => SVG(sun(70,55,22,'#FFE3A3')+`<rect x="132" y="50" width="36" height="120" fill="#D6A06A"/><rect x="138" y="30" width="24" height="22" fill="#E6B882"/><path d="M140 30 L150 12 L160 30z" fill="#C88A4E"/>`+[0,1,2,3].map(i=>`<rect x="143" y="${64+i*24}" width="14" height="14" fill="#A8703E"/>`).join('')+
+    `<path d="M0 170 V130 h120 v40z M180 170 V130 h120 v40z" fill="#E8C69A"/><g fill="#F6EBD8">`+[0,1,2,3].map(i=>`<path d="M${12+i*28} 170 v-22 a8 8 0 0 1 16 0 v22z"/><path d="M${192+i*28} 170 v-22 a8 8 0 0 1 16 0 v22z"/>`).join('')+`</g><rect y="170" width="300" height="30" fill="#C4845A"/>`,['#F6C27A','#E9784E']),
+  berlin: () => SVG(`<rect x="60" y="100" width="180" height="70" fill="#D9CBB0"/>`+[0,1,2,3,4,5].map(i=>`<rect x="${70+i*30}" y="110" width="12" height="60" fill="#B7A685"/>`).join('')+`<rect x="54" y="90" width="192" height="12" fill="#C7B794"/><path d="M130 90 l20 -26 l20 26z" fill="#6B7F5A"/><rect y="170" width="300" height="30" fill="#6E7A80"/>`,['#B9C9D6','#E5D8C4']),
+  generic: () => ART.playa()
+};
+
+/* ---------- ciudades ---------- */
+const CITIES = {
+  madrid:{n:'Madrid',iata:'MAD',ll:[40.42,-3.70],art:'madrid',pais:'España',slug:'madrid'},
+  barcelona:{n:'Barcelona',iata:'BCN',ll:[41.39,2.17],art:'barcelona',pais:'España',slug:'barcelona'},
+  sevilla:{n:'Sevilla',iata:'SVQ',ll:[37.39,-5.98],art:'sevilla',pais:'España',slug:'sevilla'},
+  valencia:{n:'Valencia',iata:'VLC',ll:[39.47,-0.38],art:'playa',pais:'España',slug:'valencia'},
+  malaga:{n:'Málaga',iata:'AGP',ll:[36.72,-4.42],art:'playa',pais:'España',slug:'malaga'},
+  palma:{n:'Palma de Mallorca',iata:'PMI',ll:[39.57,2.65],art:'playa',pais:'España',slug:'mallorca'},
+  ibiza:{n:'Ibiza',iata:'IBZ',ll:[38.91,1.43],art:'playa',pais:'España',slug:'ibiza'},
+  tenerife:{n:'Tenerife',iata:'TCI',ll:[28.29,-16.63],art:'tenerife',pais:'España',slug:'tenerife'},
+  roma:{n:'Roma',iata:'ROM',ll:[41.90,12.50],art:'roma',pais:'Italia',slug:'roma'},
+  paris:{n:'París',iata:'PAR',ll:[48.86,2.35],art:'paris',pais:'Francia',slug:'paris'},
+  londres:{n:'Londres',iata:'LON',ll:[51.51,-0.13],art:'londres',pais:'Reino Unido',slug:'londres'},
+  lisboa:{n:'Lisboa',iata:'LIS',ll:[38.72,-9.14],art:'lisboa',pais:'Portugal',slug:'lisboa'},
+  amsterdam:{n:'Ámsterdam',iata:'AMS',ll:[52.37,4.90],art:'amsterdam',pais:'Países Bajos',slug:'amsterdam'},
+  berlin:{n:'Berlín',iata:'BER',ll:[52.52,13.40],art:'berlin',pais:'Alemania',slug:'berlin'}
+};
+const ALIAS = {italia:'roma',rome:'roma',francia:'paris',paris:'paris','reino unido':'londres',inglaterra:'londres',london:'londres',portugal:'lisboa',
+  holanda:'amsterdam','paises bajos':'amsterdam',alemania:'berlin',mallorca:'palma','palma de mallorca':'palma',canarias:'tenerife',espana:'madrid'};
+function findCity(q){ const k=norm(q); if(!k) return null; if(CITIES[k]) return k; if(ALIAS[k]) return ALIAS[k];
+  return Object.keys(CITIES).find(c=>norm(CITIES[c].n)===k) || (k.length>=4 ? Object.keys(CITIES).find(c=>!CITIES[c].dyn && norm(CITIES[c].n).startsWith(k)) : null) || null; }
+
+/* ---------- qué hacer: los 3 imprescindibles ---------- */
+const TODO = {
+  roma:{intro:'Tres mil años de historia en cada esquina. Reserva con antelación: el Coliseo y los Museos Vaticanos se agotan.',items:[
+    {t:'Coliseo, Foro y Palatino',d:'El anfiteatro más grande del Imperio romano, con capacidad para unos 50.000 espectadores. La entrada combinada incluye el Foro Romano y el Palatino.',dur:'3 h',art:'roma',q:'coliseo'},
+    {t:'Vaticano y Capilla Sixtina',d:'Los Museos Vaticanos, la bóveda de Miguel Ángel y la basílica de San Pedro. Técnicamente es otro país: el más pequeño del mundo.',dur:'3–4 h',art:'dome',q:'vaticano'},
+    {t:'Fontana di Trevi',d:'La fuente barroca más famosa del mundo. La tradición dice que si lanzas una moneda de espaldas, volverás a Roma.',dur:'30 min',art:'fountain',q:'fontana-di-trevi'}]},
+  paris:{intro:'La ciudad de la luz se disfruta a pie: entre los tres imprescindibles hay menos de una hora caminando junto al Sena.',items:[
+    {t:'Torre Eiffel',d:'330 metros de hierro forjado. Sube al segundo piso o a la cima para ver todo París; al anochecer centellea cada hora.',dur:'2 h',art:'paris',q:'torre-eiffel'},
+    {t:'Museo del Louvre',d:'El museo más visitado del mundo: la Gioconda, la Venus de Milo y la Victoria de Samotracia bajo la pirámide de cristal.',dur:'3 h',art:'museum',q:'louvre'},
+    {t:'Montmartre y Sacré-Cœur',d:'El barrio de los pintores, con la basílica blanca en lo alto de la colina y las mejores vistas gratuitas de la ciudad.',dur:'2 h',art:'dome',q:'montmartre'}]},
+  londres:{intro:'Muchos de los grandes museos de Londres son gratuitos: guarda el presupuesto para las vistas y los musicales.',items:[
+    {t:'Big Ben y Westminster',d:'La torre del reloj, el Parlamento y la abadía donde se coronan los reyes británicos, todo en la orilla del Támesis.',dur:'2 h',art:'londres',q:'westminster'},
+    {t:'Torre de Londres',d:'Fortaleza de casi mil años donde se guardan las Joyas de la Corona, custodiada por los famosos Beefeaters.',dur:'2–3 h',art:'castle',q:'torre-de-londres'},
+    {t:'London Eye',d:'La noria de 135 metros junto al río: en 30 minutos ves Londres entero desde las alturas.',dur:'1 h',art:'wheel',q:'london-eye'}]},
+  lisboa:{intro:'Siete colinas, tranvías amarillos y fado. Lleva calzado cómodo: aquí todo sube o baja.',items:[
+    {t:'Torre de Belém',d:'Fortaleza del siglo XVI a orillas del Tajo, símbolo de la era de los descubrimientos. Muy cerca, prueba los pasteles de Belém.',dur:'1,5 h',art:'castle',q:'torre-de-belem'},
+    {t:'Tranvía 28 por Alfama',d:'El recorrido clásico por el barrio más antiguo, entre callejuelas, miradores y casas de azulejos.',dur:'1 h',art:'lisboa',q:'tranvia-28'},
+    {t:'Monasterio de los Jerónimos',d:'Obra maestra del estilo manuelino y Patrimonio de la Humanidad; aquí descansa Vasco da Gama.',dur:'1,5 h',art:'dome',q:'monasterio-jeronimos'}]},
+  barcelona:{intro:'Gaudí, playa y tapeo. Las entradas de la Sagrada Familia y el Park Güell son con hora: resérvalas antes de ir.',items:[
+    {t:'Sagrada Familia',d:'La basílica inacabada de Gaudí, en obras desde 1882. Por dentro, la luz de sus vidrieras parece un bosque de colores.',dur:'2 h',art:'barcelona',q:'sagrada-familia'},
+    {t:'Park Güell',d:'Mosaicos, columnas que parecen árboles y el famoso dragón de trencadís, con vistas a toda la ciudad.',dur:'1,5 h',art:'park',q:'park-guell'},
+    {t:'Casa Batlló',d:'La casa-dragón del Paseo de Gràcia: fachada ondulada, balcones como máscaras y tejado de escamas.',dur:'1 h',art:'museum',q:'casa-batllo'}]},
+  madrid:{intro:'Arte de primer nivel, terrazas y vida hasta tarde. El Prado es gratis las dos últimas horas del día.',items:[
+    {t:'Museo del Prado',d:'Velázquez, Goya y El Bosco en una de las pinacotecas más importantes del mundo.',dur:'3 h',art:'museum',q:'museo-del-prado'},
+    {t:'Palacio Real',d:'La residencia oficial del Rey, con más de 3.000 salas; es el palacio real más grande de Europa occidental.',dur:'1,5 h',art:'madrid',q:'palacio-real'},
+    {t:'Parque del Retiro',d:'Paseo en barca en el estanque y visita al Palacio de Cristal. Patrimonio de la Humanidad desde 2021.',dur:'2 h',art:'park',q:'retiro'}]},
+  sevilla:{intro:'Azahar, patios y flamenco. En verano, planifica las visitas por la mañana y deja la tarde para la sombra.',items:[
+    {t:'Real Alcázar',d:'Palacio mudéjar con jardines de ensueño; fue escenario de Juego de Tronos.',dur:'2 h',art:'sevilla',q:'real-alcazar'},
+    {t:'Catedral y Giralda',d:'La catedral gótica más grande del mundo, con la tumba de Colón. Sube la Giralda por sus rampas.',dur:'1,5 h',art:'dome',q:'catedral-sevilla'},
+    {t:'Plaza de España',d:'Semicírculo de ladrillo y azulejos con un banco por cada provincia española. Gratis y espectacular.',dur:'1 h',art:'sevilla',q:'plaza-espana'}]},
+  valencia:{intro:'Paella en su tierra, playa urbana y la arquitectura más futurista de España.',items:[
+    {t:'Ciudad de las Artes y las Ciencias',d:'El conjunto de Calatrava con el Oceanogràfic, el mayor acuario de Europa.',dur:'4 h',art:'museum',q:'ciudad-artes-ciencias'},
+    {t:'La Albufera',d:'Paseo en barca al atardecer por el lago donde nació la paella, a 15 km de la ciudad.',dur:'3 h',art:'playa',q:'albufera'},
+    {t:'Lonja y Mercado Central',d:'La Lonja de la Seda, Patrimonio de la Humanidad, y enfrente uno de los mercados modernistas más grandes de Europa.',dur:'1,5 h',art:'dome',q:'mercado-central'}]},
+  malaga:{intro:'Sol casi todo el año, Picasso y el mejor espeto de sardinas.',items:[
+    {t:'Alcazaba y Gibralfaro',d:'Fortaleza musulmana y castillo sobre la ciudad, con vistas al puerto y a la Malagueta.',dur:'2 h',art:'castle',q:'alcazaba'},
+    {t:'Caminito del Rey',d:'Pasarelas colgadas en el desfiladero de los Gaitanes, a unos 100 metros de altura.',dur:'4 h',art:'tenerife',q:'caminito-del-rey'},
+    {t:'Museo Picasso',d:'Más de 200 obras del pintor en su ciudad natal, en el Palacio de Buenavista.',dur:'1,5 h',art:'museum',q:'museo-picasso'}]},
+  palma:{intro:'Calas turquesa, pueblos de piedra y una catedral junto al mar.',items:[
+    {t:'Catedral de Palma (La Seu)',d:'El gótico junto al mar, con un rosetón gigante y detalles de Gaudí en el interior.',dur:'1 h',art:'dome',q:'catedral-palma'},
+    {t:'Calas del sur',d:'Excursión en barco a Caló des Moro, Es Trenc o Cala Varques: agua cristalina y arena blanca.',dur:'Día',art:'playa',q:'excursion-barco'},
+    {t:'Tren de Sóller',d:'Tren de madera de 1912 que cruza la Serra de Tramuntana hasta el valle de los naranjos.',dur:'Medio día',art:'tenerife',q:'tren-soller'}]},
+  ibiza:{intro:'Mucho más que fiesta: calas vírgenes, pueblos blancos y los atardeceres más famosos del Mediterráneo.',items:[
+    {t:'Dalt Vila',d:'La ciudad amurallada, Patrimonio de la Humanidad, con vistas al puerto desde la catedral.',dur:'2 h',art:'castle',q:'dalt-vila'},
+    {t:'Formentera en barco',d:'Excursión de un día a Ses Illetes, una de las playas más bonitas de Europa.',dur:'Día',art:'playa',q:'formentera'},
+    {t:'Atardecer en Cala Comte',d:'Agua turquesa y una puesta de sol sobre los islotes que no vas a olvidar.',dur:'2 h',art:'playa',q:'cala-comte'}]},
+  tenerife:{intro:'El pico más alto de España, playas volcánicas y ballenas todo el año.',items:[
+    {t:'Teide en teleférico',d:'Sube a 3.555 metros en el Parque Nacional del Teide, entre paisajes lunares. Reserva: hay cupo diario.',dur:'Medio día',art:'tenerife',q:'teide'},
+    {t:'Avistamiento de cetáceos',d:'Calderones y delfines viven todo el año frente a la costa de Los Gigantes.',dur:'3 h',art:'playa',q:'avistamiento-cetaceos'},
+    {t:'Masca y Los Gigantes',d:'Aldea colgada en un barranco y acantilados de 500 metros sobre el mar.',dur:'Medio día',art:'tenerife',q:'masca'}]},
+  amsterdam:{intro:'Canales, bicicletas y museos de primera. La Casa de Ana Frank solo vende entradas online.',items:[
+    {t:'Rijksmuseum',d:'Rembrandt y Vermeer bajo un mismo techo; La ronda de noche es la estrella.',dur:'2–3 h',art:'museum',q:'rijksmuseum'},
+    {t:'Paseo en barco por los canales',d:'Los canales del siglo XVII, Patrimonio de la Humanidad, vistos desde el agua.',dur:'1 h',art:'amsterdam',q:'crucero-canales'},
+    {t:'Casa de Ana Frank',d:'El escondite donde Ana escribió su diario durante la ocupación nazi. Una visita emocionante.',dur:'1 h',art:'amsterdam',q:'casa-ana-frank'}]},
+  berlin:{intro:'Historia viva, arte urbano y la noche más libre de Europa.',items:[
+    {t:'Puerta de Brandeburgo',d:'El símbolo de la reunificación alemana, junto al Reichstag y su cúpula de cristal.',dur:'1 h',art:'berlin',q:'puerta-brandeburgo'},
+    {t:'East Side Gallery',d:'1,3 km del Muro de Berlín convertidos en la galería al aire libre más larga del mundo.',dur:'1 h',art:'museum',q:'east-side-gallery'},
+    {t:'Isla de los Museos',d:'Cinco museos en una isla del Spree, con el busto de Nefertiti y el Altar de Pérgamo.',dur:'3 h',art:'dome',q:'isla-museos'}]}
+};
+
+/* ilustraciones extra para monumentos genéricos */
+ART.dome = () => SVG(sun(240,50,16,'#FFF1CF')+`<rect x="90" y="110" width="120" height="60" fill="#E4D2B2"/><path d="M110 110 a40 40 0 0 1 80 0z" fill="#9EB4A8"/><rect x="146" y="58" width="8" height="14" fill="#9EB4A8"/><circle cx="150" cy="56" r="4" fill="#E8C36A"/>`+[0,1,2,3,4].map(i=>`<rect x="${100+i*22}" y="122" width="8" height="48" fill="#BFA982"/>`).join('')+`<rect y="170" width="300" height="30" fill="#CDB892"/>`,['#A9CFE6','#F2D7B4']);
+ART.fountain = () => SVG(`<rect x="50" y="60" width="200" height="90" fill="#E8DCC4"/>`+[0,1,2,3,4,5].map(i=>`<rect x="${60+i*36}" y="70" width="10" height="80" fill="#CDBD9E"/>`).join('')+`<path d="M130 150 v-40 a20 20 0 0 1 40 0 v40z" fill="#CDBD9E"/><circle cx="150" cy="104" r="9" fill="#F5EEDF"/><path d="M40 150 h220 v20 h-220z" fill="#BFAE8C"/><path d="M40 170 h220 v14 h-220z" fill="#3FA7C4"/><path d="M60 176 q10 -4 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" stroke="#fff" fill="none" opacity=".6"/><rect y="184" width="300" height="16" fill="#A89878"/>`,['#F2D3A0','#E7A57A']);
+ART.museum = () => SVG(`<path d="M60 90 L150 50 L240 90z" fill="#D8C6A4"/><rect x="60" y="90" width="180" height="8" fill="#C4B08A"/>`+[0,1,2,3,4,5].map(i=>`<rect x="${70+i*30}" y="100" width="12" height="62" fill="#E9DDC6"/>`).join('')+`<rect x="54" y="162" width="192" height="10" fill="#C4B08A"/><rect y="172" width="300" height="28" fill="#9C8B6E"/><circle cx="240" cy="44" r="14" fill="#FFF1CF"/>`,['#B7D2E6','#EAD9C0']);
+ART.castle = () => SVG(sun(70,50,18,'#FFF1CF')+`<rect x="90" y="80" width="120" height="90" fill="#CDB791"/>`+[0,1,2,3,4,5].map(i=>`<rect x="${90+i*22}" y="70" width="12" height="12" fill="#CDB791"/>`).join('')+`<rect x="130" y="50" width="40" height="120" fill="#BCA47C"/>`+[0,1,2].map(i=>`<rect x="${130+i*15}" y="40" width="10" height="12" fill="#BCA47C"/>`).join('')+`<path d="M140 170 v-26 a10 10 0 0 1 20 0 v26z" fill="#6E5638"/>`+sea(170),['#A9D0EA','#F3D7AE']);
+ART.wheel = () => SVG(`<circle cx="150" cy="95" r="70" fill="none" stroke="#F4F4F4" stroke-width="4"/>`+[...Array(16)].map((_,i)=>{const a=i*Math.PI/8;return `<line x1="150" y1="95" x2="${150+70*Math.cos(a)}" y2="${95+70*Math.sin(a)}" stroke="#F4F4F4" stroke-width="1.2"/><ellipse cx="${150+70*Math.cos(a)}" cy="${95+70*Math.sin(a)}" rx="5" ry="3.5" fill="#E8F2F8"/>`}).join('')+`<path d="M150 95 L120 175 M150 95 L180 175" stroke="#DDE6EC" stroke-width="4"/>`+sea(170,'#4F7FA0','#2F5775'),['#7FA7C9','#E6B9A0']);
+ART.park = () => SVG(sun(230,50,18,'#FFF1CF')+`<path d="M0 140 C80 110 200 120 300 130 V200 H0z" fill="#7DAA62"/><path d="M0 165 C100 150 200 160 300 150 V200 H0z" fill="#5E8C4A"/><g fill="#3E6E3A"><circle cx="60" cy="118" r="22"/><circle cx="90" cy="126" r="16"/><circle cx="250" cy="122" r="20"/></g><path d="M120 140 q30 -30 60 0" fill="none" stroke="#E0604A" stroke-width="6"/><path d="M125 140 q25 -22 50 0" fill="none" stroke="#F2C14E" stroke-width="4"/><path d="M130 140 q20 -16 40 0" fill="none" stroke="#1C9C95" stroke-width="3"/>`,['#A7D6EC','#F4E2BD']);
+
+
+/* ---------- fotos reales (Wikimedia Commons, licencias libres) ----------
+   Si una foto no carga, se muestra la ilustración de respaldo. */
+const WM='https://upload.wikimedia.org/wikipedia/commons/thumb/';
+const PHOTO={
+hero:WM+'f/f9/Cal%C3%B3_des_Moro%2C_Mallorca_-_panoramio_%2814%29.jpg/1280px-Cal%C3%B3_des_Moro%2C_Mallorca_-_panoramio_%2814%29.jpg',
+coliseo:WM+'d/de/Colosseo_2020.jpg/1280px-Colosseo_2020.jpg',
+vaticano:WM+'f/f5/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg/1280px-Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg',
+trevi:WM+'c/c7/Trevi_Fountain_-_Roma.jpg/1280px-Trevi_Fountain_-_Roma.jpg',
+eiffel:WM+'d/d2/Eiffelturm.JPG/1280px-Eiffelturm.JPG',
+louvre:WM+'6/66/Louvre_Museum_Wikimedia_Commons.jpg/1280px-Louvre_Museum_Wikimedia_Commons.jpg',
+sacre:WM+'c/c5/Le_sacre_coeur.jpg/1280px-Le_sacre_coeur.jpg',
+bigben:WM+'0/05/Elizabeth_Tower_and_the_north_front_of_the_Palace_of_Westminster%2C_London.jpg/1280px-Elizabeth_Tower_and_the_north_front_of_the_Palace_of_Westminster%2C_London.jpg',
+tower:WM+'0/06/Tower_of_London_%28Foto_Hilarmont%29.jpg/1280px-Tower_of_London_%28Foto_Hilarmont%29.jpg',
+eye:WM+'d/d6/London-Eye-2009.JPG/1280px-London-Eye-2009.JPG',
+lisboa:WM+'4/41/Lisbon_%2836831596786%29_%28cropped%29.jpg/1280px-Lisbon_%2836831596786%29_%28cropped%29.jpg',
+belem:WM+'f/fa/Bel%C3%A9m_Tower_in_Lisbon%2C_Portugal.jpg/1280px-Bel%C3%A9m_Tower_in_Lisbon%2C_Portugal.jpg',
+tram:WM+'8/8c/Tram_28_in_Alfama_%28Lissabon_2016%29_%2826029557541%29.jpg/1280px-Tram_28_in_Alfama_%28Lissabon_2016%29_%2826029557541%29.jpg',
+jeronimos:WM+'d/d6/The_Jer%C3%B3nimos_Monastery_or_Hieronymites_Monastery.png/1280px-The_Jer%C3%B3nimos_Monastery_or_Hieronymites_Monastery.png',
+sagrada:'https://upload.wikimedia.org/wikipedia/commons/e/ef/SF_maig_2_cropped.jpg',
+guell:WM+'f/f8/G%C3%BCell_BCN_edited.jpg/1280px-G%C3%BCell_BCN_edited.jpg',
+batllo:WM+'4/48/Casa_Batll%C3%B3%2C_Antoni_Gaud%C3%AD.jpg/1280px-Casa_Batll%C3%B3%2C_Antoni_Gaud%C3%AD.jpg',
+prado:WM+'6/68/Museo_del_Prado_2016_%2825185969599%29.jpg/1280px-Museo_del_Prado_2016_%2825185969599%29.jpg',
+palacio:WM+'9/9b/Palacio_Real_de_Madrid_Julio_2016_%28cropped%29.jpg/1280px-Palacio_Real_de_Madrid_Julio_2016_%28cropped%29.jpg',
+retiro:'https://upload.wikimedia.org/wikipedia/commons/d/d4/Palacio_de_Cristal.jpg',
+alcazar:WM+'8/8f/Fachada_del_Palacio_del_rey_don_Pedro.jpg/1280px-Fachada_del_Palacio_del_rey_don_Pedro.jpg',
+catsev:WM+'2/2b/Sevilla_Cathedral_-_Southeast.jpg/1280px-Sevilla_Cathedral_-_Southeast.jpg',
+plazaesp:WM+'b/b6/Plaza_de_Espa%C3%B1a_%28Sevilla%29_-_01.jpg/1280px-Plaza_de_Espa%C3%B1a_%28Sevilla%29_-_01.jpg',
+cac:WM+'d/da/Hemisferic_y_Palacio_de_las_Artes_Reina_Sofia%2C_Valencia.jpg/1280px-Hemisferic_y_Palacio_de_las_Artes_Reina_Sofia%2C_Valencia.jpg',
+albufera:WM+'3/3d/Sunset_at_Albufera.JPG/1280px-Sunset_at_Albufera.JPG',
+mercado:WM+'8/86/Mercat_fa%C3%A7ana5.jpg/1280px-Mercat_fa%C3%A7ana5.jpg',
+alcazaba:WM+'5/53/Malaga_Alcazaba_25-9-2007a.JPG/1280px-Malaga_Alcazaba_25-9-2007a.JPG',
+caminito:WM+'8/8c/Desfiladero_de_los_Gaitanes05.jpg/1280px-Desfiladero_de_los_Gaitanes05.jpg',
+picasso:WM+'0/04/MuseoPicassoMalaga.jpg/1280px-MuseoPicassoMalaga.jpg',
+seu:WM+'1/12/Kathedrale_von_Palma_II.jpg/1280px-Kathedrale_von_Palma_II.jpg',
+soller:WM+'d/d8/FS_Train3_Soller.JPG/1280px-FS_Train3_Soller.JPG',
+daltvila:'https://upload.wikimedia.org/wikipedia/commons/4/42/Dalt_Vila_004.JPG',
+illetes:WM+'9/9f/Formentera_-_panoramio_%285%29.jpg/1280px-Formentera_-_panoramio_%285%29.jpg',
+comte:WM+'5/5e/Cala_Conta_17_May_2011.JPG/1280px-Cala_Conta_17_May_2011.JPG',
+teide:WM+'1/16/Teide_and_Caldera_2006.jpg/1280px-Teide_and_Caldera_2006.jpg',
+gigantes:WM+'0/0c/LosGigantes.jpg/1280px-LosGigantes.jpg',
+masca:WM+'9/9a/Masca_-_Macizo_de_Teno_03.jpg/1280px-Masca_-_Macizo_de_Teno_03.jpg',
+canal:WM+'6/61/Herengracht%2C_Amsterdam_in_the_Blue_Hour.jpg/1280px-Herengracht%2C_Amsterdam_in_the_Blue_Hour.jpg',
+rijks:WM+'f/f8/Amsterdam_rijkmuseum.JPG/1280px-Amsterdam_rijkmuseum.JPG',
+annefrank:WM+'c/cb/Amsterdam_%28NL%29%2C_Anne-Frank-Huis_--_2015_--_7185.jpg/1280px-Amsterdam_%28NL%29%2C_Anne-Frank-Huis_--_2015_--_7185.jpg',
+brandeburgo:WM+'a/a6/Brandenburger_Tor_abends.jpg/1280px-Brandenburger_Tor_abends.jpg',
+eastside:WM+'a/ab/SarahEwart-087.JPG/1280px-SarahEwart-087.JPG',
+museos:WM+'3/3a/Museumsinsel_2008.jpg/1280px-Museumsinsel_2008.jpg'};
+const TODO_PHOTOS={roma:['coliseo','vaticano','trevi'],paris:['eiffel','louvre','sacre'],londres:['bigben','tower','eye'],lisboa:['belem','tram','jeronimos'],
+  barcelona:['sagrada','guell','batllo'],madrid:['prado','palacio','retiro'],sevilla:['alcazar','catsev','plazaesp'],valencia:['cac','albufera','mercado'],
+  malaga:['alcazaba','caminito','picasso'],palma:['seu','hero','soller'],ibiza:['daltvila','illetes','comte'],tenerife:['teide','gigantes','masca'],
+  amsterdam:['rijks','canal','annefrank'],berlin:['brandeburgo','eastside','museos']};
+const CITY_PHOTO={roma:'coliseo',ibiza:'comte',paris:'eiffel',tenerife:'teide',lisboa:'lisboa',palma:'seu',amsterdam:'canal',londres:'bigben'};
+// foto encima de la ilustración; si falla la carga, se quita y queda la ilustración
+const photo=(k,alt,eager)=> PHOTO[k]?`<img class="ph" src="${PHOTO[k]}" alt="${esc(alt)}" ${eager?'':'loading="lazy"'} referrerpolicy="no-referrer" onerror="this.remove()">`:'';
+
+/* =========================================================
+   DESTINOS DEL MUNDO
+   ========================================================= */
+const WMROOT='https://upload.wikimedia.org/wikipedia/commons/';
+const wm = p => p.startsWith('http') ? p : WMROOT + p;
+const WORLD = [
+ // ---------- AMÉRICA ----------
+ {k:'nuevayork',n:'Nueva York',iata:'NYC',ll:[40.71,-74.01],pais:'Estados Unidos',reg:'america',art:'paris',slug:'nueva-york',sub:'La ciudad que nunca duerme',card:'thumb/6/69/Luchtfoto_van_Lower_Manhattan.jpg/1280px-Luchtfoto_van_Lower_Manhattan.jpg',
+  intro:'Rascacielos, Broadway y barrios con personalidad propia. El ferri gratuito a Staten Island pasa junto a la Estatua de la Libertad.',items:[
+  {t:'Estatua de la Libertad',d:'El símbolo de Nueva York, con 93 metros hasta la antorcha. El ferri a Liberty Island incluye también la isla de Ellis.',dur:'3–4 h',img:'thumb/8/89/Front_view_of_Statue_of_Liberty_%28cropped%29.jpg/1280px-Front_view_of_Statue_of_Liberty_%28cropped%29.jpg'},
+  {t:'Central Park',d:'341 hectáreas de verde en pleno Manhattan: lagos, puentes y paseos en bici o en coche de caballos.',dur:'2–3 h',img:'thumb/f/f1/Global_Citizen_Festival_Central_Park_New_York_City_from_NYonAir_%2815351915006%29.jpg/1280px-Global_Citizen_Festival_Central_Park_New_York_City_from_NYonAir_%2815351915006%29.jpg'},
+  {t:'Times Square',d:'El cruce de las pantallas gigantes y los teatros de Broadway. Mejor de noche, cuando todo se ilumina.',dur:'1 h',img:'thumb/4/47/New_york_times_square-terabass.jpg/1280px-New_york_times_square-terabass.jpg'}]},
+ {k:'miami',n:'Miami',iata:'MIA',ll:[25.76,-80.19],pais:'Estados Unidos',reg:'america',art:'playa',slug:'miami',sub:'Playa, art déco y sabor latino',
+  intro:'Sol todo el año, edificios art déco y el ambiente más latino de Estados Unidos.',items:[
+  {t:'South Beach y Ocean Drive',d:'Arena blanca, casetas de socorristas de colores y la mayor colección de edificios art déco del mundo.',dur:'Medio día',img:'thumb/b/bf/Ocean_drive_day_2009j.JPG/1280px-Ocean_drive_day_2009j.JPG'},
+  {t:'Parque Nacional Everglades',d:'Paseo en hidrodeslizador entre manglares para ver caimanes en su hábitat natural.',dur:'Medio día',img:'thumb/2/2a/Sunset_over_the_River_of_Grass%2C_NPSphoto%2C_G.Gardner_%289255157507%29.jpg/1280px-Sunset_over_the_River_of_Grass%2C_NPSphoto%2C_G.Gardner_%289255157507%29.jpg'},
+  {t:'Little Havana',d:'La Calle Ocho, el parque del Dominó, cafecito cubano y tabaquerías artesanales.',dur:'2 h',img:'thumb/f/f3/Little_Havana_Dominos_Park.JPG/1280px-Little_Havana_Dominos_Park.JPG'}]},
+ {k:'losangeles',n:'Los Ángeles',iata:'LAX',ll:[34.05,-118.24],pais:'Estados Unidos',reg:'america',art:'playa',slug:'los-angeles',sub:'Cine, playas y miradores',
+  intro:'La capital del cine: estrellas en el suelo, playas de surf y puestas de sol sobre el Pacífico. Aquí el coche es casi imprescindible.',items:[
+  {t:'Letrero de Hollywood',d:'Las letras más famosas del cine, en el monte Lee. Las mejores vistas, desde Griffith Park y Lake Hollywood Park.',dur:'2 h',img:'thumb/2/2f/Hollywood_sign_%288485145044%29.jpg/1280px-Hollywood_sign_%288485145044%29.jpg'},
+  {t:'Muelle de Santa Mónica',d:'Noria junto al mar, el final simbólico de la Ruta 66 y un paseo en bici hasta Venice Beach.',dur:'Medio día',img:'thumb/3/36/Santa_monica_pier_entrance_evening.jpg/1280px-Santa_monica_pier_entrance_evening.jpg'},
+  {t:'Observatorio Griffith',d:'Observatorio gratuito con vistas a toda la ciudad y al letrero de Hollywood. Ideal al atardecer.',dur:'2 h',img:'thumb/4/4b/Griffith_observatory_2006.jpg/1280px-Griffith_observatory_2006.jpg'}]},
+ {k:'cancun',n:'Cancún',iata:'CUN',ll:[21.16,-86.85],pais:'México',reg:'america',art:'playa',slug:'cancun',sub:'Caribe mexicano',card:'thumb/d/d8/Cancun_Strand_Luftbild_%2822143397586%29.jpg/1280px-Cancun_Strand_Luftbild_%2822143397586%29.jpg',
+  intro:'Caribe turquesa, cenotes y ciudades mayas a pocas horas. La Riviera Maya en estado puro.',items:[
+  {t:'Chichén Itzá',d:'La gran ciudad maya y su pirámide de Kukulkán, una de las Nuevas Siete Maravillas del Mundo. Está a unas 2,5 h en coche.',dur:'Día',img:'thumb/5/51/Chichen_Itza_3.jpg/1280px-Chichen_Itza_3.jpg'},
+  {t:'Isla Mujeres',d:'A 20 minutos en ferri: Playa Norte, carritos de golf y snorkel entre peces de colores.',dur:'Día',img:'6/6d/Birds_eye_view_of_Isla_Mujeres_%284257542920%29.jpg'},
+  {t:'Ruinas de Tulum',d:'La única ciudad maya construida sobre un acantilado junto al mar Caribe.',dur:'Medio día',img:'thumb/8/85/Tulum_2.jpg/1280px-Tulum_2.jpg'}]},
+ {k:'mexico',n:'Ciudad de México',iata:'MEX',ll:[19.43,-99.13],pais:'México',reg:'america',art:'museum',slug:'ciudad-de-mexico',sub:'Historia, arte y tacos',
+  intro:'Una de las capitales culturales de América: pirámides, murales y una cocina declarada Patrimonio de la Humanidad.',items:[
+  {t:'Teotihuacán',d:'Sube a la Pirámide del Sol y recorre la Calzada de los Muertos. También puedes verla desde un globo al amanecer.',dur:'Medio día',img:'thumb/a/a7/ZA77_Teotihuac%C3%A1n_edo_de_mex_Herberto_de_la_rosa.jpg/1280px-ZA77_Teotihuac%C3%A1n_edo_de_mex_Herberto_de_la_rosa.jpg'},
+  {t:'Casa Azul de Frida Kahlo',d:'La casa de Coyoacán donde nació y vivió Frida. Compra la entrada online, porque se agota.',dur:'1,5 h',img:'thumb/4/4c/Museo_Frida_Kahlo.JPG/1280px-Museo_Frida_Kahlo.JPG'},
+  {t:'Zócalo y Centro Histórico',d:'Una de las plazas más grandes del mundo, con la Catedral, el Palacio Nacional y el Templo Mayor azteca.',dur:'3 h',img:'thumb/5/5d/Z%C3%B3calo%2C_Ciudad_de_M%C3%A9xico_%2832846556446%29_%28cropped%29.jpg/1280px-Z%C3%B3calo%2C_Ciudad_de_M%C3%A9xico_%2832846556446%29_%28cropped%29.jpg'}]},
+ {k:'puntacana',n:'Punta Cana',iata:'PUJ',ll:[18.58,-68.40],pais:'República Dominicana',reg:'america',art:'playa',slug:'punta-cana',sub:'Palmeras y arena blanca',card:'thumb/f/f0/Saona_Island_December_2020.jpg/1280px-Saona_Island_December_2020.jpg',
+  intro:'Playas de postal, resorts todo incluido y excursiones a islas vírgenes.',items:[
+  {t:'Isla Saona',d:'Excursión en catamarán a la isla del Parque Nacional del Este, con parada en una piscina natural con estrellas de mar.',dur:'Día',img:'thumb/f/f0/Saona_Island_December_2020.jpg/1280px-Saona_Island_December_2020.jpg'},
+  {t:'Altos de Chavón',d:'Réplica de un pueblo mediterráneo del siglo XVI sobre el río Chavón, con anfiteatro y vistas espectaculares.',dur:'Medio día',img:'e/ec/Dominicana-Altos_de_Chavon.jpg'},
+  {t:'Zona Colonial de Santo Domingo',d:'La primera ciudad europea de América, con la catedral más antigua del continente. Patrimonio de la Humanidad.',dur:'Día',img:'thumb/4/46/Calle_las_Damas%2C_Santo_Domingo%2C_Zona_Colonial.jpg/1280px-Calle_las_Damas%2C_Santo_Domingo%2C_Zona_Colonial.jpg'}]},
+ {k:'habana',n:'La Habana',iata:'HAV',ll:[23.11,-82.37],pais:'Cuba',reg:'america',art:'fountain',slug:'la-habana',sub:'Coches clásicos y son',
+  intro:'Coches de los años 50, música en cada esquina y una arquitectura colonial única en el Caribe.',items:[
+  {t:'Habana Vieja y el Capitolio',d:'Las plazas coloniales de la Habana Vieja, Patrimonio de la Humanidad, y el Capitolio. Ideal en un coche clásico descapotable.',dur:'Medio día',img:'thumb/1/1d/El_Capitolio_Havana_Cuba.jpg/1280px-El_Capitolio_Havana_Cuba.jpg'},
+  {t:'El Malecón',d:'Ocho kilómetros de paseo marítimo donde los habaneros se reúnen al atardecer.',dur:'1–2 h',img:'3/30/Havana_malecon_%28cropped%29.jpg'},
+  {t:'Valle de Viñales',d:'Mogotes, plantaciones de tabaco y cuevas a unas 3 horas de La Habana. Patrimonio de la Humanidad.',dur:'Día',img:'thumb/c/ca/Vi%C3%B1ales_Valley.jpg/1280px-Vi%C3%B1ales_Valley.jpg'}]},
+ {k:'cartagena',n:'Cartagena de Indias',iata:'CTG',ll:[10.39,-75.48],pais:'Colombia',reg:'america',art:'castle',slug:'cartagena-de-indias',sub:'Murallas y Caribe',
+  intro:'Ciudad amurallada llena de balcones con flores, a un paso de islas de agua cristalina.',items:[
+  {t:'Castillo de San Felipe de Barajas',d:'La mayor fortaleza que construyó España en América, con túneles subterráneos que se pueden recorrer.',dur:'1,5 h',img:'thumb/b/bc/62_-_Carthag%C3%A8ne_-_D%C3%A9cembre_2008.jpg/1280px-62_-_Carthag%C3%A8ne_-_D%C3%A9cembre_2008.jpg'},
+  {t:'Islas del Rosario',d:'Parque natural de arrecifes de coral a una hora en lancha. Ideal para hacer snorkel.',dur:'Día',img:'f/f9/Karibiska_havet_i_Colombia.jpg'},
+  {t:'Ciudad amurallada',d:'Pasea por las murallas al atardecer y por las calles de colores del centro histórico, Patrimonio de la Humanidad.',dur:'3 h',img:'thumb/b/bc/62_-_Carthag%C3%A8ne_-_D%C3%A9cembre_2008.jpg/1280px-62_-_Carthag%C3%A8ne_-_D%C3%A9cembre_2008.jpg'}]},
+ {k:'cusco',n:'Cusco',iata:'CUZ',ll:[-13.53,-71.97],pais:'Perú',reg:'america',art:'tenerife',slug:'cusco',sub:'Puerta a Machu Picchu',
+  intro:'La antigua capital inca, a 3.400 metros de altitud. Tómatelo con calma el primer día para aclimatarte a la altura.',items:[
+  {t:'Machu Picchu',d:'La ciudadela inca entre montañas, una de las Nuevas Siete Maravillas. Se llega en tren hasta Aguas Calientes y el cupo diario es limitado.',dur:'Día',img:'thumb/b/bb/Machu_Picchu%2C_2023_%28012%29.jpg/1280px-Machu_Picchu%2C_2023_%28012%29.jpg'},
+  {t:'Montaña de Siete Colores',d:'Vinicunca, una montaña rayada de colores minerales a más de 5.000 metros. Una caminata exigente pero inolvidable.',dur:'Día',img:'thumb/2/24/Monta%C3%B1aarcoirisperuabanto.jpg/1280px-Monta%C3%B1aarcoirisperuabanto.jpg'},
+  {t:'Sacsayhuamán',d:'Fortaleza inca con bloques de piedra de más de 100 toneladas encajados sin argamasa, sobre la ciudad.',dur:'2 h',img:'thumb/6/60/Sacsayhuam%C3%A1n%2C_Cusco%2C_Per%C3%BA%2C_2015-07-31%2C_DD_27.JPG/1280px-Sacsayhuam%C3%A1n%2C_Cusco%2C_Per%C3%BA%2C_2015-07-31%2C_DD_27.JPG'}]},
+ {k:'buenosaires',n:'Buenos Aires',iata:'BUE',ll:[-34.60,-58.38],pais:'Argentina',reg:'america',art:'museum',slug:'buenos-aires',sub:'Tango y asado',
+  intro:'Tango, cafés históricos y asado. Una ciudad con alma europea en el corazón de Sudamérica.',items:[
+  {t:'Caminito, La Boca',d:'La calle museo de casas de chapa pintadas de colores, con bailarines de tango en la calle.',dur:'2 h',img:'thumb/4/4b/Caminito_-_Entrada.jpg/1280px-Caminito_-_Entrada.jpg'},
+  {t:'Teatro Colón',d:'Uno de los teatros de ópera con mejor acústica del mundo. Tiene visitas guiadas todos los días.',dur:'1 h',img:'thumb/8/82/Fachada_del_Teatro_Col%C3%B3n_en_Buenos_Aires%2C_Argentina.jpg/1280px-Fachada_del_Teatro_Col%C3%B3n_en_Buenos_Aires%2C_Argentina.jpg'},
+  {t:'Cementerio de la Recoleta',d:'Un laberinto de mausoleos de mármol donde descansa Eva Perón.',dur:'1,5 h',img:'thumb/a/af/La_Recoleta_Cemetery_%2841054043562%29.jpg/1280px-La_Recoleta_Cemetery_%2841054043562%29.jpg'}]},
+ {k:'rio',n:'Río de Janeiro',iata:'RIO',ll:[-22.91,-43.17],pais:'Brasil',reg:'america',art:'playa',slug:'rio-de-janeiro',sub:'Samba y playas',card:'6/62/Praia_de_Copacabana_-_Rio_de_Janeiro%2C_Brasil.jpg',
+  intro:'Montañas que caen al mar, playas legendarias y el carnaval más famoso del mundo.',items:[
+  {t:'Cristo Redentor',d:'La estatua de 30 metros en la cima del Corcovado. Se sube en un tren de cremallera entre la selva.',dur:'Medio día',img:'thumb/4/4f/Christ_the_Redeemer_-_Cristo_Redentor.jpg/1280px-Christ_the_Redeemer_-_Cristo_Redentor.jpg'},
+  {t:'Pan de Azúcar',d:'Dos teleféricos hasta la cima, con vistas a la bahía de Guanabara. Mejor al atardecer.',dur:'2–3 h',img:'thumb/8/8d/P%C3%A3o_de_A%C3%A7ucar_-_Sugarloaf_Mountain_-_Zuckerhut_-_2022.jpg/1280px-P%C3%A3o_de_A%C3%A7ucar_-_Sugarloaf_Mountain_-_Zuckerhut_-_2022.jpg'},
+  {t:'Playa de Copacabana',d:'Cuatro kilómetros de arena y el paseo de ondas blancas y negras más fotografiado de Brasil.',dur:'Medio día',img:'6/62/Praia_de_Copacabana_-_Rio_de_Janeiro%2C_Brasil.jpg'}]},
+ // ---------- ASIA ----------
+ {k:'tokio',n:'Tokio',iata:'TYO',ll:[35.68,139.69],pais:'Japón',reg:'asia',art:'dome',slug:'tokio',sub:'Tradición y neón',
+  intro:'Templos centenarios junto a rascacielos de neón. Transporte impecable y la mejor comida del mundo, a cualquier precio.',items:[
+  {t:'Templo Sensō-ji',d:'El templo más antiguo de Tokio, en Asakusa, con la famosa puerta Kaminarimon y su gran farol rojo.',dur:'1,5 h',img:'thumb/4/43/Sensoji_2023.jpg/1280px-Sensoji_2023.jpg'},
+  {t:'Cruce de Shibuya',d:'El paso de peatones más transitado del mundo: miles de personas cruzan a la vez con cada semáforo en verde.',dur:'1 h',img:'thumb/8/88/Shibuya_Crossing%2C_Aerial.jpg/1280px-Shibuya_Crossing%2C_Aerial.jpg'},
+  {t:'Monte Fuji',d:'Excursión de un día a la zona de los cinco lagos y Hakone para ver el volcán sagrado de Japón.',dur:'Día',img:'thumb/f/f8/View_of_Mount_Fuji_from_%C5%8Cwakudani_20211202.jpg/1280px-View_of_Mount_Fuji_from_%C5%8Cwakudani_20211202.jpg'}]},
+ {k:'kioto',n:'Kioto',iata:'OSA',ll:[35.01,135.77],pais:'Japón',reg:'asia',art:'dome',slug:'kioto',sub:'El Japón de las geishas',
+  intro:'La antigua capital imperial: más de 1.600 templos, jardines zen y el barrio de las geishas. Se llega en tren bala desde Osaka o Tokio.',items:[
+  {t:'Fushimi Inari',d:'Miles de toriis rojos forman túneles que suben por la montaña. Ve temprano para evitar las multitudes.',dur:'2–3 h',img:'thumb/0/0e/Torii_path_with_lantern_at_Fushimi_Inari_Taisha_Shrine%2C_Kyoto%2C_Japan.jpg/1280px-Torii_path_with_lantern_at_Fushimi_Inari_Taisha_Shrine%2C_Kyoto%2C_Japan.jpg'},
+  {t:'Kinkaku-ji',d:'El Pabellón Dorado, cubierto de pan de oro y reflejado en un estanque. La imagen más famosa de Kioto.',dur:'1 h',img:'thumb/0/0f/Golden_Pavilion_Kinkaku-ji_water_mirror_2024.jpg/1280px-Golden_Pavilion_Kinkaku-ji_water_mirror_2024.jpg'},
+  {t:'Arashiyama',d:'El bosque de bambú, el puente Togetsukyo y monos salvajes en la montaña.',dur:'Medio día',img:'thumb/c/c2/Arashiyama%2C_Part_II_-_Arashiyama7534.jpg/1280px-Arashiyama%2C_Part_II_-_Arashiyama7534.jpg'}]},
+ {k:'bangkok',n:'Bangkok',iata:'BKK',ll:[13.76,100.50],pais:'Tailandia',reg:'asia',art:'dome',slug:'bangkok',sub:'Templos dorados y street food',
+  intro:'Templos dorados, mercados flotantes y la mejor comida callejera de Asia. Para los templos, lleva los hombros y las rodillas cubiertos.',items:[
+  {t:'Gran Palacio y Buda Esmeralda',d:'El antiguo palacio de los reyes de Siam y el templo más sagrado de Tailandia.',dur:'2–3 h',img:'thumb/c/c7/0005574_-_Wat_Phra_Kaew_006.jpg/1280px-0005574_-_Wat_Phra_Kaew_006.jpg'},
+  {t:'Wat Arun',d:'El Templo del Amanecer, decorado con porcelana, a orillas del río Chao Phraya. Se cruza en barca.',dur:'1 h',img:'thumb/2/2a/%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg/1280px-%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg'},
+  {t:'Mercado de Chatuchak',d:'Más de 15.000 puestos los fines de semana: ropa, artesanía y comida callejera.',dur:'3 h',img:'thumb/3/33/Bangkok_-_Jatujak_Market_02.JPG/1280px-Bangkok_-_Jatujak_Market_02.JPG'}]},
+ {k:'phuket',n:'Phuket',iata:'HKT',ll:[7.88,98.39],pais:'Tailandia',reg:'asia',art:'playa',slug:'phuket',sub:'Islas del Andamán',
+  intro:'La isla más grande de Tailandia, puerta de entrada a las islas y bahías más espectaculares del mar de Andamán.',items:[
+  {t:'Islas Phi Phi',d:'Excursión en lancha a Maya Bay y a sus calas de agua turquesa entre acantilados.',dur:'Día',img:'thumb/e/e7/KohPhiPhi.JPG/1280px-KohPhiPhi.JPG'},
+  {t:'Bahía de Phang Nga',d:'Islotes de piedra caliza que salen del mar, cuevas en kayak y la famosa «isla de James Bond».',dur:'Día',img:'thumb/3/3e/Dramatic_karst_landscape_of_Phang_Nga_Bay%2C_Thailand.jpg/1280px-Dramatic_karst_landscape_of_Phang_Nga_Bay%2C_Thailand.jpg'},
+  {t:'Wat Chalong',d:'El templo budista más importante de Phuket, con una pagoda que guarda un fragmento de hueso de Buda.',dur:'1 h',img:'8/84/Wat_chalong_pagoda.jpg'}]},
+ {k:'bali',n:'Bali',iata:'DPS',ll:[-8.65,115.22],pais:'Indonesia',reg:'asia',art:'playa',slug:'bali',sub:'La isla de los dioses',
+  intro:'Templos hindúes sobre el mar, arrozales en terrazas y playas de surf. Un paraíso espiritual y natural.',items:[
+  {t:'Tanah Lot',d:'Templo sobre una roca en el mar que al subir la marea queda aislado. Imprescindible al atardecer.',dur:'2 h',img:'thumb/8/8d/TanahLot_2014.JPG/1280px-TanahLot_2014.JPG'},
+  {t:'Templo de Uluwatu',d:'Templo en lo alto de un acantilado de 70 metros, con danza kecak al atardecer.',dur:'3 h',img:'thumb/5/57/Pura_Luhur_Uluwatu_2017-08-17_%2834%29.jpg/1280px-Pura_Luhur_Uluwatu_2017-08-17_%2834%29.jpg'},
+  {t:'Bosque de los Monos de Ubud',d:'Santuario con más de mil macacos entre templos cubiertos de musgo. Guarda bien las gafas y el móvil.',dur:'1,5 h',img:'thumb/4/46/Monkey_Forest.jpg/1280px-Monkey_Forest.jpg'}]},
+ {k:'singapur',n:'Singapur',iata:'SIN',ll:[1.29,103.85],pais:'Singapur',reg:'asia',art:'park',slug:'singapur',sub:'La ciudad jardín',
+  intro:'Futurista, limpísima y multicultural. Perfecta como escala larga de camino a Asia u Oceanía.',items:[
+  {t:'Gardens by the Bay',d:'Superárboles de 50 metros que se iluminan cada noche con un espectáculo de luz y música gratuito.',dur:'3 h',img:'thumb/5/5d/Supertree_Grove%2C_Gardens_by_the_Bay%2C_Singapore_-_20120712-02.jpg/1280px-Supertree_Grove%2C_Gardens_by_the_Bay%2C_Singapore_-_20120712-02.jpg'},
+  {t:'Marina Bay Sands',d:'El hotel de las tres torres unidas por un barco en lo alto. El mirador SkyPark está abierto al público.',dur:'1,5 h',img:'thumb/c/c7/Marina_Bay_Sands_%28I%29.jpg/1280px-Marina_Bay_Sands_%28I%29.jpg'},
+  {t:'Isla de Sentosa',d:'Playas, Universal Studios y el acuario S.E.A. Aquarium, a 15 minutos del centro.',dur:'Día',img:'thumb/c/c3/1_sentosa_aerial_2016.jpg/1280px-1_sentosa_aerial_2016.jpg'}]},
+ // ---------- ÁFRICA Y ORIENTE MEDIO ----------
+ {k:'dubai',n:'Dubái',iata:'DXB',ll:[25.20,55.27],pais:'Emiratos Árabes',reg:'africa',art:'tenerife',slug:'dubai',sub:'Lujo en el desierto',
+  intro:'Rascacielos récord, centros comerciales gigantes y el desierto a media hora. Mejor de noviembre a marzo.',items:[
+  {t:'Burj Khalifa',d:'El edificio más alto del mundo, con 828 metros. Los miradores de las plantas 124 y 148 se reservan con hora.',dur:'2 h',img:'thumb/9/90/Burj_Khalifa_%28worlds_tallest_building%29_and_the_Dubai_skyline_%2825781049892%29.jpg/1280px-Burj_Khalifa_%28worlds_tallest_building%29_and_the_Dubai_skyline_%2825781049892%29.jpg'},
+  {t:'Safari por el desierto',d:'4x4 por las dunas, paseo en camello y cena bajo las estrellas en un campamento beduino.',dur:'Medio día',img:'thumb/7/70/Dunes_in_the_Dubai_Desert_Conservation.jpg/1280px-Dunes_in_the_Dubai_Desert_Conservation.jpg'},
+  {t:'Palm Jumeirah',d:'La isla artificial con forma de palmera, visible desde el espacio. Tiene hoteles de lujo y su propio mirador.',dur:'Medio día',img:'3/30/Artificial_Archipelagos%2C_Dubai%2C_United_Arab_Emirates_ISS022-E-024940_lrg_%28cropped%29.jpg'}]},
+ {k:'estambul',n:'Estambul',iata:'IST',ll:[41.01,28.98],pais:'Turquía',reg:'africa',art:'dome',slug:'estambul',sub:'Entre Europa y Asia',
+  intro:'La única gran ciudad en dos continentes: mezquitas, bazares y un paseo en barco por el Bósforo.',items:[
+  {t:'Santa Sofía',d:'Basílica bizantina de casi 1.500 años, hoy mezquita, con una de las cúpulas más impresionantes del mundo.',dur:'1,5 h',img:'thumb/4/4a/Hagia_Sophia_%28228968325%29.jpeg/1280px-Hagia_Sophia_%28228968325%29.jpeg'},
+  {t:'Mezquita Azul',d:'Seis minaretes y más de 20.000 azulejos de İznik en su interior. La entrada es gratuita fuera de las horas de rezo.',dur:'1 h',img:'thumb/0/03/Istanbul_%2834223582516%29_%28cropped%29.jpg/1280px-Istanbul_%2834223582516%29_%28cropped%29.jpg'},
+  {t:'Gran Bazar',d:'Uno de los mercados cubiertos más antiguos y grandes del mundo, con más de 60 calles. Aquí se regatea.',dur:'2 h',img:'thumb/d/de/Istanbul_asv2021-11_img41_Grand_Bazaar.jpg/1280px-Istanbul_asv2021-11_img41_Grand_Bazaar.jpg'}]},
+ {k:'cairo',n:'El Cairo',iata:'CAI',ll:[30.04,31.24],pais:'Egipto',reg:'africa',art:'tenerife',slug:'el-cairo',sub:'Pirámides y faraones',
+  intro:'La puerta al Egipto de los faraones: pirámides, momias y el Nilo. Combínalo con un crucero de Luxor a Asuán.',items:[
+  {t:'Pirámides de Guiza y Esfinge',d:'La única de las Siete Maravillas del mundo antiguo que sigue en pie. Se puede entrar en la Gran Pirámide.',dur:'Medio día',img:'thumb/9/96/Pyramids_of_the_Giza_Necropolis.jpg/1280px-Pyramids_of_the_Giza_Necropolis.jpg'},
+  {t:'Museo Egipcio',d:'La mayor colección de antigüedades egipcias del mundo, en el edificio histórico de la plaza Tahrir.',dur:'3 h',img:'thumb/3/33/1897_bis_1902_wurde_das_%C3%84gyptische_Museum_in_Kairo_gebaut._04.jpg/1280px-1897_bis_1902_wurde_das_%C3%84gyptische_Museum_in_Kairo_gebaut._04.jpg'},
+  {t:'Bazar de Khan el-Khalili',d:'Zoco medieval de especias, lámparas y perfumes. Termina con un té en el café El Fishawy.',dur:'2 h',img:'thumb/7/74/%D8%AE%D8%A7%D9%86_%D8%A7%D9%84%D8%AE%D9%84%D9%8A%D9%84%D9%8A_1.jpg/1280px-%D8%AE%D8%A7%D9%86_%D8%A7%D9%84%D8%AE%D9%84%D9%8A%D9%84%D9%8A_1.jpg'}]},
+ {k:'marrakech',n:'Marrakech',iata:'RAK',ll:[31.63,-7.99],pais:'Marruecos',reg:'africa',art:'fountain',slug:'marrakech',sub:'Zocos a 1 h de vuelo',
+  intro:'A un vuelo corto de España: zocos laberínticos, riads con patio y el desierto a un paso.',items:[
+  {t:'Plaza Jemaa el-Fna',d:'Encantadores de serpientes, músicos y puestos de comida que llenan la plaza al anochecer. Patrimonio Inmaterial de la Humanidad.',dur:'2 h',img:'thumb/7/79/Djemaa_el_Fna.jpg/1280px-Djemaa_el_Fna.jpg'},
+  {t:'Jardín Majorelle',d:'El jardín azul que restauró Yves Saint Laurent, con cactus y plantas de los cinco continentes.',dur:'1,5 h',img:'thumb/c/c2/Le_jardin_des_majorelle_40.JPG/1280px-Le_jardin_des_majorelle_40.JPG'},
+  {t:'Mezquita Kutubía',d:'Su minarete de 77 metros, del siglo XII, es hermano de la Giralda de Sevilla y domina la ciudad.',dur:'30 min',img:'thumb/4/49/Marokko0112_%28retouched%29.jpg/1280px-Marokko0112_%28retouched%29.jpg'}]},
+ {k:'ciudaddelcabo',n:'Ciudad del Cabo',iata:'CPT',ll:[-33.92,18.42],pais:'Sudáfrica',reg:'africa',art:'tenerife',slug:'ciudad-del-cabo',sub:'Donde se unen dos océanos',
+  intro:'Montañas, viñedos y pingüinos en la playa, en el extremo sur de África.',items:[
+  {t:'Montaña de la Mesa',d:'Teleférico giratorio hasta la cima plana, con vistas a toda la ciudad y la bahía.',dur:'Medio día',img:'thumb/d/dc/Table_Mountain_DanieVDM.jpg/1280px-Table_Mountain_DanieVDM.jpg'},
+  {t:'Cabo de Buena Esperanza',d:'Ruta por la península del Cabo, con acantilados salvajes, faro y avestruces.',dur:'Día',img:'thumb/e/e7/Playa_Dias%2C_Cape_Point%2C_Sud%C3%A1frica%2C_2018-07-23%2C_DD_103.jpg/1280px-Playa_Dias%2C_Cape_Point%2C_Sud%C3%A1frica%2C_2018-07-23%2C_DD_103.jpg'},
+  {t:'Boulders Beach',d:'Playa con una colonia de pingüinos africanos que se pueden ver desde pasarelas de madera.',dur:'2 h',img:'thumb/9/95/Boulders_Beach_Suedafrika.jpg/1280px-Boulders_Beach_Suedafrika.jpg'}]},
+ // ---------- OCEANÍA ----------
+ {k:'sidney',n:'Sídney',iata:'SYD',ll:[-33.87,151.21],pais:'Australia',reg:'oceania',art:'playa',slug:'sidney',sub:'Ópera, puerto y surf',
+  intro:'Una de las bahías más bonitas del mundo, playas de surf dentro de la ciudad y un estilo de vida al aire libre.',items:[
+  {t:'Ópera de Sídney',d:'El edificio de las velas blancas, Patrimonio de la Humanidad. Visita guiada o, mejor aún, entrada a un concierto.',dur:'1–2 h',img:'thumb/a/a0/Sydney_Australia._%2821339175489%29.jpg/1280px-Sydney_Australia._%2821339175489%29.jpg'},
+  {t:'Harbour Bridge',d:'Cruza el puente a pie o escala su arco con el BridgeClimb, a 134 metros sobre el agua.',dur:'2–3 h',img:'thumb/5/55/Sydney_Harbour_Bridge-16_October_2025.jpg/1280px-Sydney_Harbour_Bridge-16_October_2025.jpg'},
+  {t:'Bondi Beach',d:'La playa de surf más famosa de Australia y el paseo costero de Bondi a Coogee.',dur:'Medio día',img:'thumb/7/79/Bondi_from_above.jpg/1280px-Bondi_from_above.jpg'}]},
+ // ---------- MÁS EUROPA ----------
+ {k:'atenas',n:'Atenas',iata:'ATH',ll:[37.98,23.73],pais:'Grecia',reg:'europa',art:'museum',slug:'atenas',sub:'Cuna de la democracia',
+  intro:'Dioses, filósofos y tabernas en las terrazas. Aprovecha para saltar en ferri a las islas.',items:[
+  {t:'Acrópolis y Partenón',d:'El templo de Atenea domina la ciudad desde hace 2.400 años. Ve a primera hora para evitar el calor.',dur:'3 h',img:'d/da/The_Parthenon_in_Athens.jpg'},
+  {t:'Barrio de Plaka',d:'Callejuelas bajo la Acrópolis, con tabernas, tiendas y casas neoclásicas.',dur:'2 h',img:'thumb/a/a4/Carrer_del_barri_de_Plaka%2C_Atenes.JPG/1280px-Carrer_del_barri_de_Plaka%2C_Atenes.JPG'},
+  {t:'Templo de Poseidón en Sunión',d:'Columnas sobre un acantilado junto al mar Egeo, a una hora de Atenas. El mejor atardecer de Grecia.',dur:'Medio día',img:'thumb/4/45/Greece_Cape_Sounion_BW_2017-10-09_10-12-43.jpg/1280px-Greece_Cape_Sounion_BW_2017-10-09_10-12-43.jpg'}]},
+ {k:'santorini',n:'Santorini',iata:'JTR',ll:[36.39,25.46],pais:'Grecia',reg:'europa',art:'playa',slug:'santorini',sub:'Casas blancas sobre el Egeo',
+  intro:'Casas blancas y cúpulas azules sobre una caldera volcánica. Una de las islas más fotografiadas del mundo.',items:[
+  {t:'Atardecer en Oia',d:'El pueblo de las cúpulas azules y la puesta de sol más famosa del Mediterráneo. Llega pronto para coger sitio.',dur:'2 h',img:'thumb/3/37/Oia_sunset_-_panoramio_%282%29.jpg/1280px-Oia_sunset_-_panoramio_%282%29.jpg'},
+  {t:'Fira y la caldera',d:'La capital colgada del acantilado. Puedes bajar al puerto viejo en teleférico o por la escalinata.',dur:'2 h',img:'thumb/e/e9/Santorini_Fira3_tango7174.jpg/1280px-Santorini_Fira3_tango7174.jpg'},
+  {t:'Playa Roja',d:'Arena y acantilados de roca volcánica roja junto al yacimiento de Akrotiri.',dur:'2 h',img:'thumb/0/0e/Red_Beach%2C_Greece_Oct_29%2C_2018_07-12-47.jpeg/1280px-Red_Beach%2C_Greece_Oct_29%2C_2018_07-12-47.jpeg'}]},
+ {k:'venecia',n:'Venecia',iata:'VCE',ll:[45.44,12.32],pais:'Italia',reg:'europa',art:'amsterdam',slug:'venecia',sub:'La ciudad sobre el agua',
+  intro:'Canales en lugar de calles, góndolas y palacios que parecen flotar. Desde 2024, algunos días hay que pagar una tasa de acceso.',items:[
+  {t:'Basílica de San Marcos',d:'Cúpulas bizantinas y mosaicos de oro en la plaza más elegante de Europa.',dur:'1,5 h',img:'thumb/6/61/Venezia_Basilica_di_San_Marco_Fassade_2.jpg/1280px-Venezia_Basilica_di_San_Marco_Fassade_2.jpg'},
+  {t:'Gran Canal en góndola',d:'Recorre el canal principal entre palacios renacentistas en góndola o, más barato, en vaporetto.',dur:'1 h',img:'thumb/5/51/View_of_the_Grand_Canal_from_Rialto_to_Ca%27Foscari.jpg/1280px-View_of_the_Grand_Canal_from_Rialto_to_Ca%27Foscari.jpg'},
+  {t:'Puente de Rialto',d:'El puente más antiguo sobre el Gran Canal, del siglo XVI, junto al mercado de pescado.',dur:'30 min',img:'thumb/0/0b/Rialto_2025_4.jpg/1280px-Rialto_2025_4.jpg'}]},
+ {k:'florencia',n:'Florencia',iata:'FLR',ll:[43.77,11.26],pais:'Italia',reg:'europa',art:'dome',slug:'florencia',sub:'Renacimiento y Toscana',
+  intro:'La cuna del Renacimiento y la mejor base para conocer la Toscana. Pisa está a solo una hora en tren.',items:[
+  {t:'Catedral y cúpula de Brunelleschi',d:'Sube los 463 escalones de la cúpula para ver los tejados rojos de Florencia desde arriba.',dur:'2 h',img:'thumb/c/c7/Cattedrale_di_Santa_Maria_del_Fiore_%E2%80%93_Il_Duomo_di_Firenze.jpg/1280px-Cattedrale_di_Santa_Maria_del_Fiore_%E2%80%93_Il_Duomo_di_Firenze.jpg'},
+  {t:'Galería Uffizi',d:'El Nacimiento de Venus de Botticelli, Leonardo y Miguel Ángel en uno de los grandes museos del mundo.',dur:'3 h',img:'thumb/d/d7/Florence%2C_Italy_-_panoramio_%28125%29.jpg/1280px-Florence%2C_Italy_-_panoramio_%28125%29.jpg'},
+  {t:'Torre inclinada de Pisa',d:'Excursión de medio día a la Plaza de los Milagros. Se puede subir a la torre, con reserva previa.',dur:'Medio día',img:'thumb/4/4b/Italy_-_Pisa_-_Leaning_Tower.jpg/1280px-Italy_-_Pisa_-_Leaning_Tower.jpg'}]},
+ {k:'praga',n:'Praga',iata:'PRG',ll:[50.08,14.44],pais:'República Checa',reg:'europa',art:'castle',slug:'praga',sub:'La ciudad de las cien torres',
+  intro:'Un casco histórico de cuento, cerveza excelente y precios más bajos que en Europa occidental.',items:[
+  {t:'Puente de Carlos',d:'Puente gótico del siglo XIV con 30 estatuas barrocas. Crúzalo al amanecer para tenerlo casi para ti.',dur:'1 h',img:'thumb/2/22/Prague_07-2016_view_from_Lesser_Town_Tower_of_Charles_Bridge_img3.jpg/1280px-Prague_07-2016_view_from_Lesser_Town_Tower_of_Charles_Bridge_img3.jpg'},
+  {t:'Castillo de Praga',d:'Según el Guinness, el mayor complejo de castillo antiguo del mundo, con la catedral de San Vito y el Callejón del Oro.',dur:'3 h',img:'thumb/5/5e/Karl%C5%AFv_most_Praha%2C_Star%C3%A9_M%C4%9Bsto_20170810_007.jpg/1280px-Karl%C5%AFv_most_Praha%2C_Star%C3%A9_M%C4%9Bsto_20170810_007.jpg'},
+  {t:'Reloj astronómico',d:'Reloj medieval de 1410 en la plaza de la Ciudad Vieja. Cada hora desfilan los apóstoles.',dur:'30 min',img:'3/37/Astronomical_Clock_%288341899828%29.jpg'}]},
+ {k:'viena',n:'Viena',iata:'VIE',ll:[48.21,16.37],pais:'Austria',reg:'europa',art:'museum',slug:'viena',sub:'Palacios, valses y cafés',
+  intro:'Palacios imperiales, música clásica y cafés históricos donde pedir una Sachertorte.',items:[
+  {t:'Palacio de Schönbrunn',d:'La residencia de verano de los Habsburgo y de Sissi, con 1.441 habitaciones y jardines barrocos.',dur:'3 h',img:'thumb/c/c9/Wien_-_Schloss_Sch%C3%B6nbrunn.JPG/1280px-Wien_-_Schloss_Sch%C3%B6nbrunn.JPG'},
+  {t:'Catedral de San Esteban',d:'El gran templo gótico de Viena, con su tejado de azulejos de colores. Puedes subir a la torre sur.',dur:'1 h',img:'thumb/d/dd/Wien_-_Stephansdom_%281%29.JPG/1280px-Wien_-_Stephansdom_%281%29.JPG'},
+  {t:'Palacio Belvedere',d:'Palacio barroco que guarda El beso de Klimt.',dur:'2 h',img:'thumb/8/84/Palacio_Belvedere%2C_Viena%2C_Austria%2C_2020-02-01%2C_DD_93-95_HDR.jpg/1280px-Palacio_Belvedere%2C_Viena%2C_Austria%2C_2020-02-01%2C_DD_93-95_HDR.jpg'}]},
+ {k:'budapest',n:'Budapest',iata:'BUD',ll:[47.50,19.04],pais:'Hungría',reg:'europa',art:'dome',slug:'budapest',sub:'Balnearios y el Danubio',
+  intro:'Dos ciudades, Buda y Pest, unidas por el Danubio. Balnearios termales y los «bares en ruinas» más originales de Europa.',items:[
+  {t:'Parlamento de Hungría',d:'El edificio neogótico a orillas del Danubio que guarda la Santa Corona húngara. Espectacular iluminado de noche.',dur:'1,5 h',img:'thumb/9/99/Hungarian_Parliament_Building_from_across_the_Danube%2C_2025-01-11.jpg/1280px-Hungarian_Parliament_Building_from_across_the_Danube%2C_2025-01-11.jpg'},
+  {t:'Baños Széchenyi',d:'Piscinas termales al aire libre en un palacio amarillo. Hasta en invierno, con nieve alrededor.',dur:'3 h',img:'thumb/f/fa/Budapest_Sz%C3%A9chenyi_Baths_R02.jpg/1280px-Budapest_Sz%C3%A9chenyi_Baths_R02.jpg'},
+  {t:'Bastión de los Pescadores',d:'Mirador de siete torres blancas en Buda, con las mejores vistas del Parlamento.',dur:'1 h',img:'thumb/6/6a/Hal%C3%A1szb%C3%A1stya_2017.jpg/1280px-Hal%C3%A1szb%C3%A1stya_2017.jpg'}]},
+ {k:'dublin',n:'Dublín',iata:'DUB',ll:[53.35,-6.26],pais:'Irlanda',reg:'europa',art:'castle',slug:'dublin',sub:'Pubs y acantilados',
+  intro:'Pubs con música en directo, literatura y paisajes verdes a pocas horas de la ciudad.',items:[
+  {t:'Trinity College y el Libro de Kells',d:'La universidad más antigua de Irlanda, con un manuscrito del siglo IX y la espectacular Long Room.',dur:'1,5 h',img:'thumb/d/d7/The_entrance_of_the_historic_Trinity_College_%28Unsplash%29.jpg/1280px-The_entrance_of_the_historic_Trinity_College_%28Unsplash%29.jpg'},
+  {t:'Guinness Storehouse',d:'La historia de la cerveza negra más famosa, con una pinta incluida en el bar panorámico Gravity.',dur:'2 h',img:'thumb/e/ec/Guinness_Storehouse_exterior_3.jpg/1280px-Guinness_Storehouse_exterior_3.jpg'},
+  {t:'Acantilados de Moher',d:'Excursión de un día a la costa oeste: acantilados de más de 200 metros sobre el Atlántico.',dur:'Día',img:'thumb/d/d1/Cliffs-Of-Moher-OBriens-From-South.JPG/1280px-Cliffs-Of-Moher-OBriens-From-South.JPG'}]},
+ {k:'reikiavik',n:'Reikiavik',iata:'REK',ll:[64.15,-21.94],pais:'Islandia',reg:'europa',art:'tenerife',slug:'reikiavik',sub:'Auroras y géiseres',
+  intro:'Volcanes, cascadas y auroras boreales. Entre septiembre y marzo hay más probabilidad de verlas.',items:[
+  {t:'Círculo Dorado y Gullfoss',d:'La ruta clásica: la cascada de Gullfoss, el géiser Strokkur y el parque nacional de Þingvellir.',dur:'Día',img:'thumb/1/18/Gullfoss_from_the_Air_%28cropped%29.jpg/1280px-Gullfoss_from_the_Air_%28cropped%29.jpg'},
+  {t:'Laguna Azul',d:'Aguas termales de color turquesa entre campos de lava. Hay que reservar la entrada.',dur:'3 h',img:'https://upload.wikimedia.org/wikipedia/en/thumb/0/00/Blue_Lagoon_Main_Building.JPG/1280px-Blue_Lagoon_Main_Building.JPG'},
+  {t:'Hallgrímskirkja',d:'La iglesia inspirada en las columnas de basalto, con un mirador sobre los tejados de colores de Reikiavik.',dur:'1 h',img:'thumb/8/8b/Hallgrimskirkja_mai_2026.jpg/1280px-Hallgrimskirkja_mai_2026.jpg'}]}
+];
+WORLD.forEach(c=>{
+  CITIES[c.k]={n:c.n,iata:c.iata,ll:c.ll,art:c.art,pais:c.pais,slug:c.slug,reg:c.reg};
+  TODO[c.k]={intro:c.intro,items:c.items.map(i=>({t:i.t,d:i.d,dur:i.dur,art:c.art}))};
+  TODO_PHOTOS[c.k]=c.items.map((i,n)=>{const key=c.k+'_'+n; PHOTO[key]=wm(i.img); return key;});
+  if(c.card){PHOTO[c.k+'_card']=wm(c.card); CITY_PHOTO[c.k]=c.k+'_card';} else CITY_PHOTO[c.k]=c.k+'_0';
+});
+// regiones de las ciudades originales
+Object.values(CITIES).forEach(c=>{ if(!c.reg) c.reg = c.pais==='España' ? 'espana' : 'europa'; });
+Object.assign(ALIAS,{'estados unidos':'nuevayork',eeuu:'nuevayork',usa:'nuevayork','new york':'nuevayork',ny:'nuevayork','nueva york':'nuevayork','los angeles':'losangeles',hollywood:'losangeles',
+  mexico:'mexico','ciudad de mexico':'mexico',cdmx:'mexico','riviera maya':'cancun',tulum:'cancun','republica dominicana':'puntacana','santo domingo':'puntacana',cuba:'habana','la habana':'habana',havana:'habana',
+  colombia:'cartagena','cartagena de indias':'cartagena',peru:'cusco',cuzco:'cusco','machu picchu':'cusco',argentina:'buenosaires','buenos aires':'buenosaires',brasil:'rio','rio de janeiro':'rio',rio:'rio',
+  japon:'tokio',tokyo:'tokio',kyoto:'kioto',osaka:'kioto',tailandia:'bangkok',indonesia:'bali','emiratos':'dubai','emiratos arabes':'dubai',dubai:'dubai',turquia:'estambul',istanbul:'estambul',
+  egipto:'cairo','el cairo':'cairo',marruecos:'marrakech',sudafrica:'ciudaddelcabo','ciudad del cabo':'ciudaddelcabo',australia:'sidney',sydney:'sidney',grecia:'atenas',venice:'venecia',
+  pisa:'florencia',toscana:'florencia',florence:'florencia','republica checa':'praga',chequia:'praga',austria:'viena',hungria:'budapest',irlanda:'dublin',islandia:'reikiavik',reykjavik:'reikiavik'});
+function km(a,b){const R=6371,t=Math.PI/180,[la1,lo1]=a,[la2,lo2]=b;const x=Math.sin((la2-la1)*t/2)**2+Math.cos(la1*t)*Math.cos(la2*t)*Math.sin((lo2-lo1)*t/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
+const dur = m => m>=60 ? `${Math.floor(m/60)} h${m%60?' '+m%60+' min':''}` : `${m} min`;
+/* =========================================================
+   BUSCADOR MUNDIAL — cualquier ciudad, pueblo o país del mundo
+   Usa las APIs públicas y gratuitas de Wikipedia y Wikidata
+   (en el navegador del visitante; no necesita servidor).
+   ========================================================= */
+// País → ciudad principal para viajar (normalmente la capital)
+const COUNTRY_LIST = `Afganistán:Kabul|Albania:Tirana|Alemania:Berlín|Andorra:Andorra la Vella|Angola:Luanda|Antigua y Barbuda:Saint John's|Arabia Saudita:Riad|Argelia:Argel|Argentina:Buenos Aires|Armenia:Ereván|Australia:Sídney|Austria:Viena|Azerbaiyán:Bakú|Bahamas:Nasáu|Bangladés:Daca|Barbados:Bridgetown|Baréin:Manama|Bélgica:Bruselas|Belice:Belice|Benín:Cotonú|Bielorrusia:Minsk|Birmania:Rangún|Bolivia:La Paz|Bosnia y Herzegovina:Sarajevo|Botsuana:Gaborone|Brasil:Río de Janeiro|Brunéi:Bandar Seri Begawan|Bulgaria:Sofía|Burkina Faso:Uagadugú|Burundi:Buyumbura|Bután:Timbu|Cabo Verde:Praia|Camboya:Siem Reap|Camerún:Duala|Canadá:Toronto|Catar:Doha|Chad:Yamena|Chile:Santiago de Chile|China:Pekín|Chipre:Nicosia|Colombia:Bogotá|Comoras:Moroni|Congo:Brazzaville|Corea del Norte:Pionyang|Corea del Sur:Seúl|Costa de Marfil:Abiyán|Costa Rica:San José, Costa Rica|Croacia:Dubrovnik|Cuba:La Habana|Dinamarca:Copenhague|Dominica:Roseau|Ecuador:Quito|Egipto:El Cairo|El Salvador:San Salvador|Emiratos Árabes Unidos:Dubái|Eritrea:Asmara|Eslovaquia:Bratislava|Eslovenia:Liubliana|España:Madrid|Estados Unidos:Nueva York|Estonia:Tallin|Esuatini:Mbabane|Etiopía:Adís Abeba|Filipinas:Manila|Finlandia:Helsinki|Fiyi:Nadi|Francia:París|Gabón:Libreville|Gambia:Banjul|Georgia:Tiflis|Ghana:Acra|Granada:Saint George's|Grecia:Atenas|Guatemala:Antigua Guatemala|Guinea:Conakri|Guinea-Bisáu:Bisáu|Guinea Ecuatorial:Malabo|Guyana:Georgetown|Haití:Puerto Príncipe|Honduras:Tegucigalpa|Hungría:Budapest|India:Nueva Delhi|Indonesia:Bali|Irak:Bagdad|Irán:Teherán|Irlanda:Dublín|Islandia:Reikiavik|Islas Marshall:Majuro|Islas Salomón:Honiara|Israel:Jerusalén|Italia:Roma|Jamaica:Montego Bay|Japón:Tokio|Jordania:Petra|Kazajistán:Almaty|Kenia:Nairobi|Kirguistán:Biskek|Kiribati:Tarawa|Kosovo:Pristina|Kuwait:Kuwait|Laos:Luang Prabang|Lesoto:Maseru|Letonia:Riga|Líbano:Beirut|Liberia:Monrovia|Libia:Trípoli|Liechtenstein:Vaduz|Lituania:Vilna|Luxemburgo:Luxemburgo|Macedonia del Norte:Skopie|Madagascar:Antananarivo|Malasia:Kuala Lumpur|Malaui:Lilongüe|Maldivas:Malé|Malí:Bamako|Malta:La Valeta|Marruecos:Marrakech|Mauricio:Port Louis|Mauritania:Nuakchot|México:Ciudad de México|Micronesia:Palikir|Moldavia:Chisináu|Mónaco:Mónaco|Mongolia:Ulán Bator|Montenegro:Kotor|Mozambique:Maputo|Namibia:Windhoek|Nauru:Yaren|Nepal:Katmandú|Nicaragua:Granada, Nicaragua|Níger:Niamey|Nigeria:Lagos|Noruega:Oslo|Nueva Zelanda:Auckland|Omán:Mascate|Países Bajos:Ámsterdam|Pakistán:Lahore|Palaos:Koror|Palestina:Belén|Panamá:Ciudad de Panamá|Papúa Nueva Guinea:Port Moresby|Paraguay:Asunción|Perú:Cusco|Polonia:Cracovia|Portugal:Lisboa|Reino Unido:Londres|República Centroafricana:Bangui|República Checa:Praga|República Democrática del Congo:Kinsasa|República Dominicana:Punta Cana|Ruanda:Kigali|Rumania:Bucarest|Rusia:Moscú|Samoa:Apia|San Cristóbal y Nieves:Basseterre|San Marino:San Marino|San Vicente y las Granadinas:Kingstown|Santa Lucía:Castries|Santo Tomé y Príncipe:Santo Tomé|Senegal:Dakar|Serbia:Belgrado|Seychelles:Victoria, Seychelles|Sierra Leona:Freetown|Singapur:Singapur|Siria:Damasco|Somalia:Mogadiscio|Sri Lanka:Colombo|Sudáfrica:Ciudad del Cabo|Sudán:Jartum|Sudán del Sur:Yuba|Suecia:Estocolmo|Suiza:Zúrich|Surinam:Paramaribo|Tailandia:Bangkok|Taiwán:Taipéi|Tanzania:Zanzíbar|Tayikistán:Dusambé|Timor Oriental:Dili|Togo:Lomé|Tonga:Nukualofa|Trinidad y Tobago:Puerto España|Túnez:Túnez|Turkmenistán:Asjabad|Turquía:Estambul|Tuvalu:Funafuti|Ucrania:Kiev|Uganda:Kampala|Uruguay:Montevideo|Uzbekistán:Samarcanda|Vanuatu:Port Vila|Vaticano:Ciudad del Vaticano|Venezuela:Caracas|Vietnam:Hanói|Yemen:Saná|Yibuti:Yibuti|Zambia:Livingstone|Zimbabue:Cataratas Victoria|Puerto Rico:San Juan, Puerto Rico|Groenlandia:Nuuk|Hong Kong:Hong Kong|Polinesia Francesa:Bora Bora|Escocia:Edimburgo|Inglaterra:Londres|Gales:Cardiff|Aruba:Oranjestad|Curazao:Willemstad`;
+const COUNTRIES={}; const COUNTRY_NAMES=[];
+COUNTRY_LIST.split('|').forEach(x=>{const [c,city]=x.split(':'); COUNTRIES[norm(c)]={name:c,city}; COUNTRY_NAMES.push(c);});
+Object.assign(COUNTRIES,{eeuu:COUNTRIES['estados unidos'],usa:COUNTRIES['estados unidos'],holanda:COUNTRIES['paises bajos'],myanmar:COUNTRIES['birmania'],chequia:COUNTRIES['republica checa'],
+  emiratos:COUNTRIES['emiratos arabes unidos'],'emiratos arabes':COUNTRIES['emiratos arabes unidos'],congo:COUNTRIES['congo'],'costa de marfil':COUNTRIES['costa de marfil'],
+  'arabia saudi':COUNTRIES['arabia saudita'],'reino unido':COUNTRIES['reino unido'],'nueva zelandia':COUNTRIES['nueva zelanda'],belarus:COUNTRIES['bielorrusia'],swazilandia:COUNTRIES['esuatini']});
+// Regiones y estados → ciudad de entrada
+const REGION_CITY={alaska:'Anchorage',hawai:'Honolulu',hawaii:'Honolulu',california:'San Francisco',florida:'Miami',texas:'Austin',nevada:'Las Vegas',patagonia:'El Calafate',
+  'tierra del fuego':'Ushuaia',amazonas:'Manaos',amazonia:'Manaos',galapagos:'Islas Galápagos','isla de pascua':'Isla de Pascua',caribe:'Punta Cana',baviera:'Múnich',
+  cataluna:'Barcelona',andalucia:'Sevilla',baleares:'Palma de Mallorca',galicia:'Santiago de Compostela','pais vasco':'San Sebastián',asturias:'Oviedo',cerdena:'Cerdeña',sicilia:'Palermo',
+  provenza:'Aviñón',normandia:'Mont-Saint-Michel',escandinavia:'Copenhague',laponia:'Rovaniemi',siberia:'Irkutsk',tibet:'Lhasa',serengeti:'Parque nacional del Serengeti',
+  quebec:'Quebec',ontario:'Toronto','columbia britanica':'Vancouver',yucatan:'Mérida, Yucatán','baja california':'Cabo San Lucas',
+  bora:'Bora Bora',tahiti:'Papeete',zanzibar:'Zanzíbar','atacama':'San Pedro de Atacama','salar de uyuni':'Uyuni',uyuni:'Uyuni','cataratas del iguazu':'Puerto Iguazú',iguazu:'Puerto Iguazú'};
+
+const DYN={};            // caché de búsquedas
+const J = (u,ms=12000) => { const c=new AbortController(); const t=setTimeout(()=>c.abort(),ms); return fetch(u,{signal:c.signal}).then(r=>r.json()).finally(()=>clearTimeout(t)); };
+const WP = (lang,params) => J(`https://${lang}.wikipedia.org/w/api.php?origin=*&format=json&formatversion=2&${params}`);
+const WD = params => J(`https://www.wikidata.org/w/api.php?origin=*&format=json&${params}`);
+const countryIn = txt => { const t=norm(txt); let best=''; for(const c of COUNTRY_NAMES){ const n=norm(c); if(n.length>best.length && new RegExp('\\b'+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b').test(t)) best=c; } return best; };
+
+async function geocode(q){
+  const r=await WP('es',`action=query&generator=search&gsrsearch=${encodeURIComponent(q)}&gsrlimit=6&prop=coordinates|description|pageprops&ppprop=wikibase_item&coprimary=primary`);
+  return (r.query?.pages||[]).sort((a,b)=>a.index-b.index).filter(p=>p.coordinates)
+    .map(p=>({title:p.title,desc:p.description||'',lat:p.coordinates[0].lat,lon:p.coordinates[0].lon,q:p.pageprops?.wikibase_item}));
+}
+async function resolvePlace(q){
+  const cur=findCity(q); if(cur) return cur;
+  const n=norm(q); if(!n) return null;
+  if(DYN[n]) return DYN[n];
+  let query=q, country='';
+  if(COUNTRIES[n]){ country=COUNTRIES[n].name; const cc=findCity(COUNTRIES[n].city); if(cc){DYN[n]=cc; return cc;} query=COUNTRIES[n].city; }
+  else if(REGION_CITY[n]){ const cc=findCity(REGION_CITY[n]); if(cc){DYN[n]=cc; return cc;} query=REGION_CITY[n]; }
+  const g=(await geocode(query))[0]; if(!g) return null;
+  const key='w:'+g.title;
+  if(!CITIES[key]) CITIES[key]={n:g.title.replace(/\s*\(.*\)$/,'').replace(/,.*$/,''),ll:[g.lat,g.lon],pais:country||countryIn(g.desc+' '+g.title)||'',desc:g.desc,art:'playa',dyn:true,q:g.q,wp:g.title};
+  DYN[n]=key; return key;
+}
+// Lo más famoso cerca de unas coordenadas (Wikipedia: artículos con foto, ordenados por visitas)
+const BAD_RE=/(ciudad|localidad|municipio|barrio|distrito|departamento|provincia|comuna|pueblo|\br[ií]o\b|aeropuerto|estaci[oó]n|universidad|colegio|escuela|club|estadio|empresa|compa[ñn][ií]a|pol[ií]tic|futbolista|cantante|actor|actriz|escritor|\bcity\b|\btown\b|village|neighbou?rhood|district|borough|suburb|county|region|\briver\b|airport|station|university|college|school|company|football|stadium|politician|singer|census|commune|hospital|embassy|embajada|highway|autopista|carretera|\broad\b|\bstreet\b|avenida|\bcalle\b|\bmetro\b|railway|ferrocarril|di[oó]cesis|diocese|election|elecci[oó]n|battle|batalla|incendio|attack|atentado|earthquake|terremoto|television|radio|newspaper|peri[oó]dico|crash|accidente|summit|cumbre|military|militar|air base|base a[eé]rea|prison|c[aá]rcel|asedio|siege|\bbank\b|banco|congres|legislat|parlamento|asamblea|chamber of|c[aá]mara de|rione|quartiere|\bterm\b|hotel|\bmall\b|shopping|office|oficinas|headquarters|\bsede\b|ministry|ministerio|\bLDS\b|consulate|consulado|\bcourt\b|tribunal|\bbus\b|sports|deportiv|polideportivo|campus|library|biblioteca|institute|instituto|association|asociaci|capital|municipality|settlement|localit|census|parish|parroquia civil|\bward\b|constituency|circunscripci|prefecture|prefectura|cant[oó]n|township|hamlet|aldea|urbanizaci|residential|apartment|edificio de oficinas|power station|central el[eé]ctrica|factory|f[aá]brica|\bmine\b|\bmina\b|brewery|cervecer|\bvuelo \d|\bflight \d|\bfire\b|incendi|massacre|masacre|disaster|desastre|bombing|explosi[oó]n|shooting|tiroteo|\briot|protest|convention cent|centro de convenciones)/i;
+const GOOD_RE=/(museo|museum|catedral|cathedral|iglesia|church|bas[ií]lica|basilica|templo|temple|palacio|palace|castillo|castle|fortaleza|fortress|\bfort\b|parque|\bpark\b|plaza|square|monumento|monument|mirador|jard[ií]n|garden|mercado|market|teatro|theat|puente|bridge|playa|beach|lago|\blake\b|monta[ñn]a|mountain|volc|cascada|waterfall|falls|ruinas|ruins|arqueol|archaeolog|zoo|acuario|aquarium|torre|tower|mosque|mezquita|shrine|santuario|sanctuary|landmark|patrimonio|heritage|historic|hist[oó]ric|\barch\b|arco|anfiteatro|amphitheat|pyramid|pir[aá]mide|glacier|glaciar|parque nacional|national park|reserva|reserve|isla|island|\bbay\b|bah[ií]a|cementerio|cemetery|convento|convent|monasterio|monastery|pagoda|stupa|estatua|statue|cueva|cave|desierto|desert|salar|laguna|lagoon|fiordo|fjord|ca[ñn][oó]n|canyon|valle|valley|sitio|site)/i;
+async function geoLang(lang,lat,lon){
+  const L=await WP(lang,`action=query&list=geosearch&gscoord=${lat}|${lon}&gsradius=10000&gslimit=250&gsprimary=primary`);
+  const geo=L.query?.geosearch||[]; const ids=geo.map(g=>g.pageid); const pos={}; geo.forEach(g=>pos[g.pageid]=g);
+  const chunks=[]; for(let i=0;i<ids.length;i+=50) chunks.push(ids.slice(i,i+50));
+  const res=await Promise.all(chunks.map(c=>WP(lang,`action=query&pageids=${c.join('|')}&prop=pageimages|pageprops|description&piprop=thumbnail&pithumbsize=900&pilimit=50&ppprop=wikibase_item`).catch(()=>({}))));
+  return res.flatMap(r=>r.query?.pages||[]).map(p=>({id:p.pageid,q:p.pageprops?.wikibase_item,title:p.title,lang,img:p.thumbnail?.source,desc:p.description||'',
+    views:0,dist:pos[p.pageid]?.dist||0,lat:pos[p.pageid]?.lat,lon:pos[p.pageid]?.lon}));
+}
+// Visitas de los últimos 30 días (la API solo da unas pocas páginas por petición, así que vamos de 10 en 10)
+async function addViews(list){
+  const jobs=[];
+  for(const lang of ['es','en']){ const L=list.filter(p=>p.lang===lang); for(let i=0;i<L.length;i+=10){ const part=L.slice(i,i+10);
+    jobs.push(WP(lang,`action=query&pageids=${part.map(p=>p.id).join('|')}&prop=pageviews&pvipdays=30`).then(r=>{ (r.query?.pages||[]).forEach(pg=>{ const it=part.find(p=>p.id===pg.pageid); if(it) it.views=Object.values(pg.pageviews||{}).reduce((a,b)=>a+(b||0),0); }); }).catch(()=>{})); } }
+  await Promise.all(jobs);
+}
+async function famousNear(key){
+  const C=CITIES[key]; if(C.top) return C.top;
+  const [lat,lon]=C.ll;
+  const [a,b]=await Promise.all([geoLang('es',lat,lon).catch(()=>[]),geoLang('en',lat,lon).catch(()=>[])]);
+  const cityName=norm(C.n);
+  const ok=p=>p.img && !/\.svg/i.test(p.img) && !BAD_RE.test(p.desc) && !BAD_RE.test(p.title) && !/\b(1[0-9]|20)\d\d\b/.test(p.title) && p.q!==C.q && norm(p.title)!==cityName;
+  const cand=[...a.filter(ok).slice(0,60),...b.filter(ok).slice(0,60)];
+  await addViews(cand);
+  const tot={}; cand.forEach(p=>{ if(p.q) tot[p.q]=(tot[p.q]||0)+p.views; });
+  const all=cand.map(p=>({...p,score:((p.q?tot[p.q]:p.views)+5)*(GOOD_RE.test(p.desc+' '+p.title)?3:0.35)})).sort((x,y)=>y.score-x.score);
+  const seen=new Set(), top=[];
+  for(const p of all){ const k=p.q||p.title; if(seen.has(k)) continue; seen.add(k); top.push(p); if(top.length===3) break; }
+  if(!top.length){ C.top=[]; return []; }
+  // Textos en español: título y resumen de la Wikipedia en español cuando existe
+  const qs=top.map(p=>p.q).filter(Boolean);
+  let ents={};
+  if(qs.length){ try{ ents=(await WD(`action=wbgetentities&ids=${qs.join('|')}&props=labels|descriptions|sitelinks&languages=es&sitefilter=eswiki`)).entities||{}; }catch(e){} }
+  top.forEach(p=>{ const e=ents[p.q]; p.esTitle = p.lang==='es' ? p.title : e?.sitelinks?.eswiki?.title; p.label = p.esTitle || e?.labels?.es?.value || p.title; p.esDesc = e?.descriptions?.es?.value || ''; });
+  const esTitles=top.map(p=>p.esTitle).filter(Boolean), enTitles=top.filter(p=>!p.esTitle).map(p=>p.title);
+  const [esx,enx]=await Promise.all([
+    esTitles.length?WP('es',`action=query&prop=extracts&exintro=1&explaintext=1&exsentences=2&titles=${encodeURIComponent(esTitles.join('|'))}`).catch(()=>({})):{},
+    enTitles.length?WP('en',`action=query&prop=extracts&exintro=1&explaintext=1&exsentences=2&titles=${encodeURIComponent(enTitles.join('|'))}`).catch(()=>({})):{}]);
+  const ex={}; [...(esx.query?.pages||[]),...(enx.query?.pages||[])].forEach(p=>ex[p.title]=p.extract);
+  top.forEach(p=>{ let t = p.esTitle ? ex[p.esTitle] : (p.esDesc ? p.esDesc.charAt(0).toUpperCase()+p.esDesc.slice(1)+'.' : ex[p.title]);
+    t=(t||p.desc||'').replace(/\s*\([^)]*\)/g,'').replace(/\s+/g,' ').trim(); if(t.length>230) t=t.slice(0,t.lastIndexOf(' ',225))+'…'; p.text=t;
+    p.km = p.lat!=null ? km(C.ll,[p.lat,p.lon]) : p.dist/1000; });
+  C.top=top; return top;
+}
+
+/* ---------- aeropuertos principales (respuesta instantánea; el resto se busca en Wikidata) ----------
+   CÓDIGO|Ciudad|País|Nombre|lat|lon|clave de ciudad con contenido propio
+   Nombre "*" = código de ciudad que agrupa todos sus aeropuertos */
+const AIRPORTS_RAW=`MAD|Madrid|España|Adolfo Suárez Madrid-Barajas|40.49|-3.57|madrid
+BCN|Barcelona|España|Josep Tarradellas Barcelona-El Prat|41.30|2.08|barcelona
+AGP|Málaga|España|Málaga-Costa del Sol|36.67|-4.50|malaga
+PMI|Palma de Mallorca|España|Palma de Mallorca|39.55|2.74|palma
+IBZ|Ibiza|España|Ibiza|38.87|1.37|ibiza
+SVQ|Sevilla|España|Sevilla|37.42|-5.89|sevilla
+VLC|Valencia|España|Valencia|39.49|-0.48|valencia
+ALC|Alicante|España|Alicante-Elche Miguel Hernández|38.28|-0.56|
+BIO|Bilbao|España|Bilbao|43.30|-2.91|
+TFS|Tenerife|España|Tenerife Sur|28.04|-16.57|tenerife
+TFN|Tenerife|España|Tenerife Norte|28.48|-16.34|tenerife
+LPA|Gran Canaria|España|Gran Canaria|27.93|-15.39|
+ACE|Lanzarote|España|César Manrique-Lanzarote|28.95|-13.61|
+FUE|Fuerteventura|España|Fuerteventura|28.45|-13.86|
+SPC|La Palma|España|La Palma|28.63|-17.76|
+MAH|Menorca|España|Menorca|39.86|4.22|
+SCQ|Santiago de Compostela|España|Rosalía de Castro|42.90|-8.42|
+OVD|Asturias|España|Asturias|43.56|-6.03|
+SDR|Santander|España|Seve Ballesteros-Santander|43.43|-3.82|
+GRX|Granada|España|F.G.L. Granada-Jaén|37.19|-3.78|
+ZAZ|Zaragoza|España|Zaragoza|41.67|-1.04|
+VGO|Vigo|España|Vigo|42.23|-8.63|
+XRY|Jerez de la Frontera|España|Jerez|36.74|-6.06|
+LEI|Almería|España|Almería|36.84|-2.37|
+GRO|Girona|España|Girona-Costa Brava|41.90|2.76|
+REU|Reus|España|Reus|41.15|1.17|
+LON|Londres|Reino Unido|*|51.51|-0.13|londres
+LHR|Londres|Reino Unido|Heathrow|51.47|-0.45|londres
+LGW|Londres|Reino Unido|Gatwick|51.15|-0.19|londres
+STN|Londres|Reino Unido|Stansted|51.89|0.24|londres
+LTN|Londres|Reino Unido|Luton|51.87|-0.37|londres
+MAN|Mánchester|Reino Unido|Mánchester|53.35|-2.27|
+EDI|Edimburgo|Reino Unido|Edimburgo|55.95|-3.37|
+PAR|París|Francia|*|48.86|2.35|paris
+CDG|París|Francia|Charles de Gaulle|49.01|2.55|paris
+ORY|París|Francia|Orly|48.72|2.36|paris
+NCE|Niza|Francia|Niza-Costa Azul|43.66|7.21|
+MRS|Marsella|Francia|Marsella-Provenza|43.44|5.22|
+ROM|Roma|Italia|*|41.90|12.50|roma
+FCO|Roma|Italia|Fiumicino-Leonardo da Vinci|41.80|12.25|roma
+CIA|Roma|Italia|Ciampino|41.80|12.59|roma
+MIL|Milán|Italia|*|45.46|9.19|
+MXP|Milán|Italia|Malpensa|45.63|8.72|
+LIN|Milán|Italia|Linate|45.45|9.28|
+BGY|Milán|Italia|Bérgamo-Orio al Serio|45.67|9.70|
+VCE|Venecia|Italia|Marco Polo|45.51|12.35|venecia
+FLR|Florencia|Italia|Florencia-Peretola|43.81|11.20|florencia
+PSA|Pisa|Italia|Galileo Galilei|43.68|10.39|florencia
+NAP|Nápoles|Italia|Nápoles-Capodichino|40.88|14.29|
+LIS|Lisboa|Portugal|Humberto Delgado|38.77|-9.13|lisboa
+OPO|Oporto|Portugal|Francisco Sá Carneiro|41.24|-8.68|
+FAO|Faro|Portugal|Faro|37.01|-7.97|
+AMS|Ámsterdam|Países Bajos|Schiphol|52.31|4.76|amsterdam
+BRU|Bruselas|Bélgica|Bruselas|50.90|4.48|
+BER|Berlín|Alemania|Berlín-Brandeburgo|52.37|13.50|berlin
+MUC|Múnich|Alemania|Múnich|48.35|11.79|
+FRA|Fráncfort|Alemania|Fráncfort|50.04|8.56|
+ZRH|Zúrich|Suiza|Zúrich|47.46|8.55|
+GVA|Ginebra|Suiza|Ginebra|46.24|6.11|
+VIE|Viena|Austria|Viena-Schwechat|48.11|16.57|viena
+PRG|Praga|República Checa|Václav Havel|50.10|14.26|praga
+BUD|Budapest|Hungría|Ferenc Liszt|47.44|19.26|budapest
+WAW|Varsovia|Polonia|Chopin|52.17|20.97|
+KRK|Cracovia|Polonia|Juan Pablo II|50.08|19.78|
+DUB|Dublín|Irlanda|Dublín|53.43|-6.25|dublin
+CPH|Copenhague|Dinamarca|Kastrup|55.62|12.65|
+OSL|Oslo|Noruega|Gardermoen|60.19|11.10|
+STO|Estocolmo|Suecia|*|59.33|18.07|
+ARN|Estocolmo|Suecia|Arlanda|59.65|17.92|
+HEL|Helsinki|Finlandia|Helsinki-Vantaa|60.32|24.96|
+KEF|Reikiavik|Islandia|Keflavík|63.99|-22.62|reikiavik
+ATH|Atenas|Grecia|Eleftherios Venizelos|37.94|23.94|atenas
+JTR|Santorini|Grecia|Santorini|36.40|25.48|santorini
+IST|Estambul|Turquía|Estambul|41.26|28.74|estambul
+SAW|Estambul|Turquía|Sabiha Gökçen|40.90|29.31|estambul
+DBV|Dubrovnik|Croacia|Dubrovnik|42.56|18.27|
+SPU|Split|Croacia|Split|43.54|16.30|
+MLA|La Valeta|Malta|Malta|35.86|14.48|
+OTP|Bucarest|Rumania|Henri Coandă|44.57|26.08|
+SOF|Sofía|Bulgaria|Sofía|42.70|23.41|
+RAK|Marrakech|Marruecos|Menara|31.61|-8.04|marrakech
+CMN|Casablanca|Marruecos|Mohammed V|33.37|-7.59|
+TNG|Tánger|Marruecos|Ibn Battouta|35.73|-5.92|
+CAI|El Cairo|Egipto|El Cairo|30.12|31.41|cairo
+HRG|Hurghada|Egipto|Hurghada|27.18|33.80|
+TUN|Túnez|Túnez|Túnez-Cartago|36.85|10.23|
+DXB|Dubái|Emiratos Árabes Unidos|Dubái|25.25|55.36|dubai
+AUH|Abu Dabi|Emiratos Árabes Unidos|Zayed|24.43|54.65|
+DOH|Doha|Catar|Hamad|25.27|51.61|
+TLV|Tel Aviv|Israel|Ben Gurión|32.01|34.89|
+AMM|Amán|Jordania|Reina Alia|31.72|35.99|
+CPT|Ciudad del Cabo|Sudáfrica|Ciudad del Cabo|-33.97|18.60|ciudaddelcabo
+JNB|Johannesburgo|Sudáfrica|O. R. Tambo|-26.14|28.24|
+NBO|Nairobi|Kenia|Jomo Kenyatta|-1.32|36.93|
+ZNZ|Zanzíbar|Tanzania|Abeid Amani Karume|-6.22|39.22|
+ADD|Adís Abeba|Etiopía|Bole|8.98|38.80|
+LOS|Lagos|Nigeria|Murtala Muhammed|6.58|3.32|
+DSS|Dakar|Senegal|Blaise Diagne|14.67|-17.07|
+MRU|Mauricio|Mauricio|Sir Seewoosagur Ramgoolam|-20.43|57.68|
+SEZ|Mahé|Seychelles|Seychelles|-4.67|55.52|
+MLE|Malé|Maldivas|Velana|4.19|73.53|
+TYO|Tokio|Japón|*|35.68|139.69|tokio
+HND|Tokio|Japón|Haneda|35.55|139.78|tokio
+NRT|Tokio|Japón|Narita|35.77|140.39|tokio
+OSA|Osaka|Japón|*|34.69|135.50|kioto
+KIX|Osaka|Japón|Kansai|34.43|135.23|kioto
+BKK|Bangkok|Tailandia|Suvarnabhumi|13.69|100.75|bangkok
+DMK|Bangkok|Tailandia|Don Mueang|13.91|100.61|bangkok
+HKT|Phuket|Tailandia|Phuket|8.11|98.32|phuket
+DPS|Bali|Indonesia|Ngurah Rai|-8.75|115.17|bali
+SIN|Singapur|Singapur|Changi|1.36|103.99|singapur
+KUL|Kuala Lumpur|Malasia|Kuala Lumpur|2.75|101.71|
+HKG|Hong Kong|China|Hong Kong|22.31|113.91|
+BJS|Pekín|China|*|39.90|116.40|
+PEK|Pekín|China|Capital|40.08|116.58|
+PKX|Pekín|China|Daxing|39.51|116.41|
+PVG|Shanghái|China|Pudong|31.14|121.81|
+ICN|Seúl|Corea del Sur|Incheon|37.46|126.44|
+DEL|Nueva Delhi|India|Indira Gandhi|28.56|77.10|
+BOM|Bombay|India|Chhatrapati Shivaji|19.09|72.87|
+KTM|Katmandú|Nepal|Tribhuvan|27.70|85.36|
+SGN|Ho Chi Minh|Vietnam|Tan Son Nhat|10.82|106.66|
+HAN|Hanói|Vietnam|Noi Bai|21.22|105.81|
+MNL|Manila|Filipinas|Ninoy Aquino|14.51|121.02|
+CMB|Colombo|Sri Lanka|Bandaranaike|7.18|79.88|
+SYD|Sídney|Australia|Kingsford Smith|-33.95|151.18|sidney
+MEL|Melbourne|Australia|Tullamarine|-37.67|144.84|
+AKL|Auckland|Nueva Zelanda|Auckland|-37.01|174.79|
+PPT|Papeete|Polinesia Francesa|Faa'a|-17.55|-149.61|
+NYC|Nueva York|Estados Unidos|*|40.71|-74.01|nuevayork
+JFK|Nueva York|Estados Unidos|John F. Kennedy|40.64|-73.78|nuevayork
+EWR|Nueva York|Estados Unidos|Newark Liberty|40.69|-74.17|nuevayork
+LGA|Nueva York|Estados Unidos|LaGuardia|40.78|-73.87|nuevayork
+MIA|Miami|Estados Unidos|Miami|25.80|-80.29|miami
+LAX|Los Ángeles|Estados Unidos|Los Ángeles|33.94|-118.41|losangeles
+SFO|San Francisco|Estados Unidos|San Francisco|37.62|-122.38|
+LAS|Las Vegas|Estados Unidos|Harry Reid|36.08|-115.15|
+MCO|Orlando|Estados Unidos|Orlando|28.43|-81.31|
+CHI|Chicago|Estados Unidos|*|41.88|-87.63|
+ORD|Chicago|Estados Unidos|O'Hare|41.98|-87.90|
+BOS|Boston|Estados Unidos|Logan|42.37|-71.02|
+WAS|Washington|Estados Unidos|*|38.90|-77.04|
+IAD|Washington|Estados Unidos|Dulles|38.95|-77.46|
+ANC|Anchorage|Estados Unidos|Ted Stevens|61.17|-149.99|
+HNL|Honolulu|Estados Unidos|Daniel K. Inouye|21.32|-157.92|
+YYZ|Toronto|Canadá|Pearson|43.68|-79.63|
+YUL|Montreal|Canadá|Trudeau|45.47|-73.74|
+YVR|Vancouver|Canadá|Vancouver|49.19|-123.18|
+MEX|Ciudad de México|México|Benito Juárez|19.44|-99.07|mexico
+CUN|Cancún|México|Cancún|21.04|-86.87|cancun
+GDL|Guadalajara|México|Miguel Hidalgo|20.52|-103.31|
+HAV|La Habana|Cuba|José Martí|22.99|-82.41|habana
+PUJ|Punta Cana|República Dominicana|Punta Cana|18.57|-68.36|puntacana
+SDQ|Santo Domingo|República Dominicana|Las Américas|18.43|-69.67|
+SJU|San Juan|Puerto Rico|Luis Muñoz Marín|18.44|-66.00|
+PTY|Ciudad de Panamá|Panamá|Tocumen|9.07|-79.38|
+SJO|San José|Costa Rica|Juan Santamaría|9.99|-84.20|
+GUA|Ciudad de Guatemala|Guatemala|La Aurora|14.58|-90.53|
+SAL|San Salvador|El Salvador|Óscar Arnulfo Romero|13.44|-89.06|
+MGA|Managua|Nicaragua|Augusto C. Sandino|12.14|-86.17|
+BOG|Bogotá|Colombia|El Dorado|4.70|-74.15|
+MDE|Medellín|Colombia|José María Córdova|6.16|-75.42|
+CTG|Cartagena de Indias|Colombia|Rafael Núñez|10.44|-75.51|cartagena
+UIO|Quito|Ecuador|Mariscal Sucre|-0.13|-78.36|
+GYE|Guayaquil|Ecuador|José Joaquín de Olmedo|-2.16|-79.88|
+LIM|Lima|Perú|Jorge Chávez|-12.02|-77.11|
+CUZ|Cusco|Perú|Alejandro Velasco Astete|-13.54|-71.94|cusco
+LPB|La Paz|Bolivia|El Alto|-16.51|-68.19|
+VVI|Santa Cruz de la Sierra|Bolivia|Viru Viru|-17.64|-63.14|
+ASU|Asunción|Paraguay|Silvio Pettirossi|-25.24|-57.52|
+SCL|Santiago de Chile|Chile|Arturo Merino Benítez|-33.39|-70.79|
+BUE|Buenos Aires|Argentina|*|-34.60|-58.38|buenosaires
+EZE|Buenos Aires|Argentina|Ezeiza|-34.82|-58.54|buenosaires
+AEP|Buenos Aires|Argentina|Aeroparque Jorge Newbery|-34.56|-58.42|buenosaires
+MVD|Montevideo|Uruguay|Carrasco|-34.84|-56.03|
+RIO|Río de Janeiro|Brasil|*|-22.91|-43.17|rio
+GIG|Río de Janeiro|Brasil|Galeão|-22.81|-43.25|rio
+SDU|Río de Janeiro|Brasil|Santos Dumont|-22.91|-43.16|rio
+SAO|São Paulo|Brasil|*|-23.55|-46.63|
+GRU|São Paulo|Brasil|Guarulhos|-23.43|-46.47|
+CCS|Caracas|Venezuela|Simón Bolívar|10.60|-66.99|
+USH|Ushuaia|Argentina|Malvinas Argentinas|-54.84|-68.31|
+FTE|El Calafate|Argentina|Comandante Armando Tola|-50.28|-72.05|
+IGR|Puerto Iguazú|Argentina|Cataratas del Iguazú|-25.74|-54.47|`;
+const AIRPORTS = AIRPORTS_RAW.split('\n').map(l=>{ const [code,city,country,name,lat,lon,ck]=l.split('|');
+  return {code,city,country,name:name==='*'?'':name,all:name==='*',lat:+lat,lon:+lon,ck:ck||'',kind:name==='*'?'city':'airport'}; });
+const AP_BY_CODE = Object.fromEntries(AIRPORTS.map(a=>[a.code,a]));
+
+
+/* =========================================================
+   APLICACIÓN
+   ========================================================= */
+const TODAY = new Date(); TODAY.setHours(12,0,0,0);
+const iso = d => d.toISOString().slice(0,10);
+const addDays = (s,n) => { const d=new Date(s+'T12:00:00'); d.setDate(d.getDate()+n); return iso(d); };
+const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const fmt = s => { if(!s) return ''; const d=new Date(s+'T12:00:00'); return `${d.getDate()} ${MES[d.getMonth()]}`; };
+const store = { get(k,def){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):def; }catch(e){ return def; } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} } };
+const ICO = {
+  plane:'<svg viewBox="0 0 24 24"><path d="M2 16l20-6-3-2-7 2-5-5-2 1 3 6-4 1-2-2-1 1z"/></svg>',
+  city:'<svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V9l5-3v15M10 21V4l9 4v13M13 9h3M13 13h3M13 17h3"/></svg>',
+  pin:'<svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  globe:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg>',
+  train:'<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14M9 21l-2 0 2-4M15 21h2l-2-4"/></svg>',
+  bed:'<svg viewBox="0 0 24 24"><path d="M3 18V6M3 14h18v4M21 14v-3a3 3 0 0 0-3-3h-7v6"/><circle cx="7" cy="10.5" r="1.8"/></svg>',
+  car:'<svg viewBox="0 0 24 24"><path d="M5 17h14M6 17v2M18 17v2M4 13l2-5h12l2 5v4H4z"/><circle cx="8" cy="14.5" r=".8"/><circle cx="16" cy="14.5" r=".8"/></svg>',
+  ext:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5H5V6h5"/></svg>'
+};
+
+/* ---------- pestañas ---------- */
+const TABS=[{id:'vuelos',label:'Vuelos',ico:'plane',panel:'p-vuelos'},{id:'tierra',label:'Trenes y buses',ico:'train',panel:'p-tierra'},{id:'hotel',label:'Hoteles',ico:'bed',panel:'p-hotel'},{id:'coche',label:'Coches',ico:'car',panel:'p-coche'}];
+let tab='vuelos';
+function syncTabs(){ document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.id===tab?'true':'false'));
+  TABS.forEach(t=>$(t.panel).hidden=t.id!==tab); $('formErr').textContent=''; }
+$('tabs').innerHTML=TABS.map(t=>`<button type="button" class="tab" role="tab" data-id="${t.id}" aria-controls="${t.panel}">${ICO[t.ico]}<span>${t.label}</span></button>`).join('');
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ tab=b.dataset.id; syncTabs(); });
+
+/* ---------- pasajeros / huéspedes ---------- */
+function paxWidget(el,{kids=true,infants=true,cabin=false,rooms=false,adultsLabel='Adultos',init={}}){
+  const st={ad:init.ad??1,ch:init.ch??0,inf:init.inf??0,rooms:init.rooms??1,cabin:init.cabin??'e'};
+  const id=el.id;
+  el.innerHTML=`<span class="flabel" id="${id}-l">${rooms?'Huéspedes':'Pasajeros'}${cabin?' y clase':''}</span>
+    <button type="button" class="paxbtn" id="${id}-b" aria-expanded="false" aria-controls="${id}-p" aria-labelledby="${id}-l ${id}-b"></button>
+    <div class="paxpanel" id="${id}-p" hidden>
+      ${row('ad',adultsLabel,rooms?'':'12 años o más')}${kids?row('ch','Niños',rooms?'0 a 17 años':'2 a 11 años'):''}${infants?row('inf','Bebés','Menores de 2 años'):''}${rooms?row('rooms','Habitaciones',''):''}
+      ${cabin?`<label class="flabel" for="${id}-cab" style="margin-top:.4rem">Clase</label><select id="${id}-cab"><option value="e">Turista</option><option value="p">Turista Premium</option><option value="b">Business</option><option value="f">Primera</option></select>`:''}
+      <button type="button" class="paxdone">Listo</button></div>`;
+  function row(k,t,s){ return `<div class="prow"><div><b>${t}</b><small>${s}</small></div><div class="step"><button type="button" data-k="${k}" data-d="-1" aria-label="Quitar ${t.toLowerCase()}">−</button><output data-o="${k}">0</output><button type="button" data-k="${k}" data-d="1" aria-label="Añadir ${t.toLowerCase()}">+</button></div></div>`; }
+  const btn=el.querySelector('.paxbtn'), panel=el.querySelector('.paxpanel');
+  const lim={ad:[1,9],ch:[0,8],inf:[0,4],rooms:[1,9]};
+  function paint(){
+    el.querySelectorAll('output').forEach(o=>o.textContent=st[o.dataset.o]);
+    el.querySelectorAll('.step button').forEach(b=>{ const k=b.dataset.k,d=+b.dataset.d,v=st[k]+d; b.disabled = v<lim[k][0] || v>lim[k][1] || (k==='inf'&&v>st.ad) || (k!=='rooms'&&d>0&&st.ad+st.ch+st.inf>=9); });
+    const n=st.ad+st.ch+st.inf; const cabTxt={e:'Turista',p:'Turista Premium',b:'Business',f:'Primera'}[st.cabin];
+    btn.textContent = rooms ? `${n} ${n===1?'huésped':'huéspedes'} · ${st.rooms} hab.` : `${n} ${n===1?'pasajero':'pasajeros'}${cabin?' · '+cabTxt:''}`;
+  }
+  el.querySelectorAll('.step button').forEach(b=>b.onclick=()=>{ st[b.dataset.k]+=+b.dataset.d; if(st.inf>st.ad) st.inf=st.ad; paint(); });
+  const cab=el.querySelector('select'); if(cab){ cab.value=st.cabin; cab.onchange=()=>{ st.cabin=cab.value; paint(); }; }
+  const open=v=>{ panel.hidden=!v; btn.setAttribute('aria-expanded',v); };
+  btn.onclick=()=>open(panel.hidden);
+  el.querySelector('.paxdone').onclick=()=>{ open(false); btn.focus(); };
+  document.addEventListener('click',e=>{ if(!el.contains(e.target)) open(false); });
+  el.addEventListener('keydown',e=>{ if(e.key==='Escape'){ open(false); btn.focus(); } });
+  paint();
+  return { get:()=>({...st}), set:v=>{ Object.assign(st,v); if(cab) cab.value=st.cabin; paint(); } };
+}
+const paxFlight=paxWidget($('paxF'),{cabin:true});
+const paxHotel=paxWidget($('paxH'),{kids:true,infants:false,rooms:true,init:{ad:2}});
+$('g-pax').innerHTML=Array.from({length:9},(_,i)=>`<option value="${i+1}">${i+1} ${i?'pasajeros':'pasajero'}</option>`).join('');
+['c-t1','c-t2'].forEach(id=>$(id).innerHTML=Array.from({length:48},(_,i)=>{const h=String(Math.floor(i/2)).padStart(2,'0'),m=i%2?'30':'00';return `<option value="${h}:${m}"${h+':'+m==='10:00'?' selected':''}>${h}:${m}</option>`;}).join(''));
+
+/* ---------- fechas ---------- */
+function initDates(){
+  const t=iso(TODAY), d1=addDays(t,21), d2=addDays(t,28);
+  [['f-d1',d1],['f-d2',d2],['g-d1',d1],['g-d2',''],['h-d1',d1],['h-d2',addDays(d1,3)],['c-d1',d1],['c-d2',addDays(d1,7)]].forEach(([id,v])=>{ $(id).value=v; $(id).min=t; });
+  const pair=(a,b,gap)=>$(a).addEventListener('change',()=>{ const v=$(a).value; if(!v) return; $(b).min=v; if($(b).value && $(b).value<v) $(b).value=addDays(v,gap); });
+  pair('f-d1','f-d2',7); pair('g-d1','g-d2',7); pair('h-d1','h-d2',3); pair('c-d1','c-d2',7);
+}
+initDates();
+
+/* ---------- tipo de viaje ---------- */
+function trip(){ return document.querySelector('input[name="trip"]:checked').value; }
+function syncTrip(){
+  const t=trip(); $('f-d2').disabled = t==='ow'; $('simpleLeg').hidden = t==='mc'; $('multiLegs').hidden = t!=='mc';
+  const w=$('paxF').querySelector('.flabel')?$('paxF'):$('paxM');
+  if(t==='mc' && !$('paxM').firstChild){ while($('paxF').firstChild) $('paxM').appendChild($('paxF').firstChild); }
+  if(t!=='mc' && !$('paxF').firstChild){ while($('paxM').firstChild) $('paxF').appendChild($('paxM').firstChild); }
+  if(t==='mc' && !$('legs').children.length){ addLeg(SEL['f-from'],SEL['f-to'],$('f-d1').value); addLeg(SEL['f-to'],null,$('f-d2').value||addDays($('f-d1').value,4)); }
+}
+document.querySelectorAll('input[name="trip"]').forEach(r=>r.onchange=syncTrip);
+let legN=0;
+function addLeg(from,to,date){
+  if($('legs').children.length>=5) return;
+  const n=++legN, row=document.createElement('div'); row.className='leg';
+  row.innerHTML=`<div class="field"><label for="m${n}-from">Origen</label><input id="m${n}-from" data-mode="air" placeholder="Ciudad o aeropuerto" autocomplete="off"></div>
+    <div class="field"><label for="m${n}-to">Destino</label><input id="m${n}-to" data-mode="air" placeholder="Ciudad o aeropuerto" autocomplete="off"></div>
+    <div class="field"><label for="m${n}-d">Fecha</label><input id="m${n}-d" type="date" min="${iso(TODAY)}"></div>
+    <button type="button" class="legdel" aria-label="Quitar este trayecto">×</button>`;
+  $('legs').appendChild(row);
+  const [fi,ti,di]=row.querySelectorAll('input'); combo(fi); combo(ti);
+  if(from) setSel(fi,from); if(to) setSel(ti,to); di.value=date||'';
+  ti.addEventListener('change',()=>{});
+  row.querySelector('.legdel').onclick=()=>{ if($('legs').children.length>2) row.remove(); };
+}
+$('addLeg').onclick=()=>{ const rows=[...$('legs').children]; const last=rows[rows.length-1]; const lt=last&&SEL[last.querySelectorAll('input')[1].id]; const ld=last&&last.querySelectorAll('input')[2].value; addLeg(lt||null,null,ld?addDays(ld,3):''); };
+
+/* =========================================================
+   AUTOCOMPLETADO: aeropuertos y lugares de todo el mundo
+   ========================================================= */
+const SEL={};
+const shortAp = n => (n||'').replace(/^Aeropuerto\s+(Internacional\s+)?(de\s+|del\s+)?/i,'').replace(/\s+International Airport$|\s+Airport$/i,'');
+function labelFor(s){
+  if(!s) return '';
+  if(s.kind==='explore') return 'Cualquier destino';
+  if(s.kind==='place') return s.city;
+  return `${s.city||shortAp(s.name)} (${s.code})`;
+}
+function setSel(inp,s){ SEL[inp.id]=s||null; inp.value=labelFor(s); inp.title = s&&s.name?`${s.name}${s.city?' · '+s.city:''}${s.country?', '+s.country:''}`:''; }
+function localAirportMatches(q){
+  const n=norm(q); if(!n) return [];
+  const byCountry = n.length>=4 ? AIRPORTS.filter(a=>norm(a.country).startsWith(n)) : [];
+  const m = AIRPORTS.filter(a=> norm(a.code)===n || norm(a.city).startsWith(n) || (n.length>=3 && norm(a.name).includes(n)));
+  const seen=new Set(), out=[]; for(const a of [...m,...byCountry]){ if(!seen.has(a.code)){ seen.add(a.code); out.push(a); } }
+  // ordenar: código exacto, luego ciudades con varios aeropuertos (código de ciudad primero)
+  out.sort((a,b)=>(norm(b.code)===n)-(norm(a.code)===n) || a.city.localeCompare(b.city) || (b.all-a.all));
+  return out.slice(0,12);
+}
+async function wdAirports(ids){
+  if(!ids.length) return [];
+  const e=await WD(`action=wbgetentities&ids=${ids.join('|')}&props=labels|descriptions|claims&languages=es|en`);
+  const ents=Object.values(e.entities||{}).filter(x=>x.claims);
+  const val=(c,p)=>c[p]?.[0]?.mainsnak?.datavalue?.value;
+  const refs=new Set(); ents.forEach(x=>{ const c=x.claims; const city=val(c,'P931'); const co=val(c,'P17'); if(city?.id) refs.add(city.id); if(co?.id) refs.add(co.id); });
+  let lab={}; if(refs.size){ try{ lab=(await WD(`action=wbgetentities&ids=${[...refs].slice(0,50).join('|')}&props=labels&languages=es|en`)).entities||{}; }catch(err){} }
+  const L=id=>{ const l=lab[id]?.labels; return (l?.es||l?.en||{}).value||''; };
+  return ents.map(x=>{ const c=x.claims, co=val(c,'P625'); const name=(x.labels?.es||x.labels?.en||{}).value||'';
+      const code=val(c,'P238'); const desc=(x.descriptions?.es||x.descriptions?.en||{}).value||'';
+      return {kind:'airport',code:code&&String(code).toUpperCase(),name,city:L(val(c,'P931')?.id)||'',country:L(val(c,'P17')?.id)||'',lat:co?.latitude,lon:co?.longitude,desc,
+        intl:/(internacional|international)/i.test(name+' '+desc), closed:!!(c.P576||c.P3999)}; })
+    .filter(a=>a.code && /^[A-Z]{3}$/.test(a.code) && a.lat!=null && !a.closed && !/(heli|base a[eé]rea|air force|air base|militar|military|aer[oó]dromo|airfield|airstrip|seaplane|hidroavi)/i.test(a.name+' '+a.desc));
+}
+async function remoteAirports(q){
+  const qs=[`haswbstatement:P238 ${q}`]; if(/^[a-z]{3}$/i.test(q.trim())) qs.unshift(`haswbstatement:P238=${q.trim().toUpperCase()}`);
+  const res=await Promise.all(qs.map(s=>WD(`action=query&list=search&srsearch=${encodeURIComponent(s)}&srlimit=8`).catch(()=>({}))));
+  const ids=[...new Set(res.flatMap(r=>(r.query?.search||[]).map(x=>x.title)))].slice(0,12);
+  const list=await wdAirports(ids);
+  list.sort((a,b)=>(b.intl-a.intl)); const seen=new Set();
+  return list.filter(a=>!seen.has(a.code)&&seen.add(a.code));
+}
+async function airportsNear(lat,lon,radius=150,country=''){
+  const s=await WD(`action=query&list=search&srsearch=${encodeURIComponent(`haswbstatement:P238 nearcoord:${radius}km,${lat},${lon}`)}&srlimit=15`);
+  const list=await wdAirports((s.query?.search||[]).map(x=>x.title));
+  list.forEach(a=>{ a.km=Math.round(km([lat,lon],[a.lat,a.lon])); a.score=a.km-(a.intl?60:0)-(country&&a.country&&norm(a.country)===norm(country)?80:0); });
+  const seen=new Set(); return list.sort((a,b)=>a.score-b.score).filter(a=>!seen.has(a.code)&&seen.add(a.code));
+}
+async function remotePlaces(q){
+  const r=await WP('es',`action=query&generator=prefixsearch&gpssearch=${encodeURIComponent(q)}&gpslimit=10&prop=coordinates|description|pageprops&ppprop=wikibase_item&coprimary=primary`);
+  return (r.query?.pages||[]).filter(p=>p.coordinates).sort((a,b)=>a.index-b.index).slice(0,6)
+    .map(p=>({kind:'place',city:p.title.replace(/\s*\(.*\)$/,''),wp:p.title,desc:p.description||'',country:countryIn(p.description||''),lat:p.coordinates[0].lat,lon:p.coordinates[0].lon}));
+}
+function apToSel(a){ return {kind:a.all?'city':'airport',code:a.code,city:a.city,country:a.country,name:a.name,lat:a.lat,lon:a.lon,ck:a.ck||''}; }
+function optHTML(o,i,sub){
+  const s=o.sel; let ico=ICO.plane,t1='',t2='',code='';
+  if(o.type==='explore'){ ico=ICO.globe; t1='Cualquier destino'; t2='Descubre los vuelos más baratos desde tu origen'; }
+  else if(s.kind==='city'){ ico=ICO.city; t1=`${s.city}, ${s.country}`; t2='Todos los aeropuertos'; code=s.code; }
+  else if(s.kind==='airport'){ t1=s.name?shortAp(s.name):s.city; t2=[s.city,s.country].filter(Boolean).join(', ')||s.desc||''; code=s.code; }
+  else { ico=ICO.pin; t1=s.city; t2=o.air?`Buscar el aeropuerto más cercano · ${s.desc||''}`:(s.desc||''); }
+  return `<li class="opt${sub?' sub':''}" role="option" id="${o.id}" aria-selected="false" data-i="${i}"><span class="ico">${ico}</span><span><span class="t1">${esc(t1)}</span><br><span class="t2">${esc(String(t2).slice(0,80))}</span></span><span class="code">${esc(code)}</span></li>`;
+}
+function combo(inp){
+  const mode=inp.dataset.mode, air=mode==='air';
+  const wrap=inp.parentElement; const list=document.createElement('ul'); list.className='ac'; list.id=inp.id+'-ac'; list.setAttribute('role','listbox'); list.hidden=true; wrap.appendChild(list);
+  inp.setAttribute('role','combobox'); inp.setAttribute('aria-autocomplete','list'); inp.setAttribute('aria-controls',list.id); inp.setAttribute('aria-expanded','false');
+  let opts=[], act=-1, timer, seq=0;
+  const close=()=>{ list.hidden=true; inp.setAttribute('aria-expanded','false'); act=-1; inp.removeAttribute('aria-activedescendant'); };
+  const paint=(groups,note)=>{
+    opts=[]; let html='';
+    groups.forEach(g=>{ if(!g.items.length) return; if(g.title) html+=`<li class="grp" role="presentation">${esc(g.title)}</li>`;
+      g.items.forEach(it=>{ it.id=`${inp.id}-o${opts.length}`; it.air=air; html+=optHTML(it,opts.length,it.sub); opts.push(it); }); });
+    if(note) html+=`<li class="note" role="presentation">${note}</li>`;
+    if(!html){ close(); return; }
+    list.innerHTML=html; list.hidden=false; inp.setAttribute('aria-expanded','true'); act=-1;
+    list.querySelectorAll('.opt').forEach(li=>li.onmousedown=e=>{ e.preventDefault(); pick(+li.dataset.i); });
+  };
+  const localGroups=q=>{
+    const items=[];
+    if(air){
+      const m=localAirportMatches(q);
+      const cities=[...new Set(m.map(a=>a.city))];
+      cities.forEach(c=>{ const all=m.filter(a=>a.city===c); const cityCode=all.find(a=>a.all); if(cityCode){ items.push({sel:apToSel(cityCode)}); all.filter(a=>!a.all).forEach(a=>items.push({sel:apToSel(a),sub:true})); } else all.forEach(a=>items.push({sel:apToSel(a)})); });
+    } else {
+      const seen=new Set(); const n=norm(q);
+      [...AIRPORTS.map(a=>({city:a.city,country:a.country,lat:a.lat,lon:a.lon,ck:a.ck})),...Object.entries(CITIES).filter(([k,c])=>!c.dyn).map(([k,c])=>({city:c.n,country:c.pais,lat:c.ll[0],lon:c.ll[1],ck:k}))]
+        .filter(c=>norm(c.city).startsWith(n)).forEach(c=>{ if(seen.has(c.city)) return; seen.add(c.city); items.push({sel:{kind:'place',city:c.city,country:c.country,lat:c.lat,lon:c.lon,ck:c.ck,desc:c.country}}); });
+    }
+    return items.slice(0,10);
+  };
+  async function run(){
+    const q=inp.value.trim(); const my=++seq;
+    if(q.length<2){ if(inp.dataset.explore && tab==='vuelos') paint([{items:[{type:'explore',sel:{kind:'explore',code:'',city:'Cualquier destino'}}]}]); else close(); return; }
+    const loc=localGroups(q);
+    const extra = inp.dataset.explore ? [{items:[{type:'explore',sel:{kind:'explore',code:'',city:'Cualquier destino'}}]}] : [];
+    paint([{title:air?'Aeropuertos':'Ciudades',items:loc},...extra], q.length>=3?'<span class="loading">Buscando en todo el mundo…</span>':'');
+    if(q.length<3) return;
+    const [ra,rp]=await Promise.all([air?remoteAirports(q).catch(()=>[]):[], remotePlaces(q).catch(()=>[])]);
+    if(my!==seq || inp.value.trim()!==q || document.activeElement!==inp) return;
+    const have=new Set(loc.map(o=>o.sel.code).filter(Boolean));
+    const moreAir=ra.filter(a=>!have.has(a.code)).slice(0,6).map(a=>({sel:a}));
+    const haveCity=new Set(loc.map(o=>norm(o.sel.city)));
+    const places=rp.filter(p=>!haveCity.has(norm(p.city))).slice(0,5).map(p=>({sel:p}));
+    paint([{title:air?'Aeropuertos':'Ciudades',items:[...loc,...moreAir]},{title:air?'Ciudades y lugares':'Más lugares',items:places},...extra],
+      (!loc.length&&!moreAir.length&&!places.length)?'No encontramos ese lugar. Prueba con otra forma de escribirlo.':'');
+  }
+  async function pick(i){
+    const o=opts[i]; if(!o) return; close();
+    if(air && o.sel.kind==='place'){
+      inp.value=`${o.sel.city} · buscando aeropuerto…`;
+      try{ const near=await airportsNear(o.sel.lat,o.sel.lon,150,o.sel.country); if(near.length){ const b=near[0];
+          setSel(inp,{kind:'airport',code:b.code,name:b.name,city:o.sel.city,country:o.sel.country||b.country,lat:b.lat,lon:b.lon,place:{lat:o.sel.lat,lon:o.sel.lon},alts:near.slice(0,4).map(a=>({code:a.code,name:a.name,km:a.km,lat:a.lat,lon:a.lon})),distKm:b.km}); }
+        else { inp.value=o.sel.city; SEL[inp.id]=null; $('formErr').textContent=`No hay aeropuertos a menos de 150 km de ${o.sel.city}. Prueba con una ciudad más grande cercana.`; }
+      }catch(e){ inp.value=o.sel.city; }
+    } else setSel(inp,o.sel);
+    inp.dispatchEvent(new Event('picked'));
+  }
+  inp.addEventListener('input',()=>{ SEL[inp.id]=null; clearTimeout(timer); timer=setTimeout(run,180); });
+  inp.addEventListener('focus',()=>{ if(!SEL[inp.id]) run(); else inp.select(); });
+  inp.addEventListener('blur',()=>setTimeout(close,150));
+  $('searchForm').addEventListener('submit',()=>{ seq++; clearTimeout(timer); close(); });
+  inp.addEventListener('keydown',e=>{
+    if(list.hidden && e.key==='ArrowDown'){ run(); return; }
+    if(list.hidden) return;
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); act=(act+(e.key==='ArrowDown'?1:-1)+opts.length)%opts.length;
+      list.querySelectorAll('.opt').forEach((li,j)=>li.setAttribute('aria-selected',j===act)); const cur=list.querySelector(`[data-i="${act}"]`); if(cur){ cur.scrollIntoView({block:'nearest'}); inp.setAttribute('aria-activedescendant',cur.id); } }
+    else if(e.key==='Enter' && act>=0){ e.preventDefault(); pick(act); }
+    else if(e.key==='Escape'){ close(); }
+  });
+}
+document.querySelectorAll('input[data-mode]').forEach(combo);
+
+// Si el usuario escribe y no elige de la lista, adivinamos el mejor resultado
+async function resolveInput(inp){
+  if(SEL[inp.id]) return SEL[inp.id];
+  const q=inp.value.trim(); if(!q) return null;
+  const air=inp.dataset.mode==='air';
+  if(inp.dataset.explore && /^cualquier/i.test(q)){ const s={kind:'explore',code:'',city:'Cualquier destino'}; setSel(inp,s); return s; }
+  const n=norm(q);
+  const country=COUNTRIES[n];
+  const q2 = country ? country.city : (REGION_CITY[n]||q);
+  if(air){
+    const loc=localAirportMatches(q2).filter(a=>norm(a.city)===norm(q2)||norm(a.code)===norm(q2));
+    if(loc.length){ const a=loc.find(x=>x.all)||loc[0]; const s=apToSel(a); setSel(inp,s); return s; }
+    const places=await remotePlaces(q2).catch(()=>[]);
+    const p=places[0];
+    if(p){ const near=await airportsNear(p.lat,p.lon,150,country?.name||p.country).catch(()=>[]); if(near.length){ const b=near[0];
+      const s={kind:'airport',code:b.code,name:b.name,city:p.city,country:country?.name||p.country||b.country,lat:b.lat,lon:b.lon,place:{lat:p.lat,lon:p.lon},alts:near.slice(0,4).map(a=>({code:a.code,name:a.name,km:a.km,lat:a.lat,lon:a.lon})),distKm:b.km};
+      setSel(inp,s); return s; } }
+    const ra=await remoteAirports(q2).catch(()=>[]); if(ra[0]){ setSel(inp,ra[0]); return ra[0]; }
+    return null;
+  } else {
+    const cur=findCity(q2); if(cur){ const C=CITIES[cur]; const s={kind:'place',city:C.n,country:C.pais,lat:C.ll[0],lon:C.ll[1],ck:cur}; setSel(inp,s); return s; }
+    const p=(await remotePlaces(q2).catch(()=>[]))[0]; if(p){ if(country) p.country=country.name; setSel(inp,p); return p; }
+    return null;
+  }
+}
+
+/* ---------- intercambiar ---------- */
+function swap(a,b){ const A=SEL[a],B=SEL[b],av=$(a).value,bv=$(b).value; if(B&&B.kind==='explore') return; SEL[a]=B; SEL[b]=A; $(a).value=bv; $(b).value=av; }
+$('swapBtn').onclick=()=>swap('f-from','f-to'); $('gswapBtn').onclick=()=>swap('g-from','g-to');
+
+/* =========================================================
+   ENLACES A LOS BUSCADORES (búsqueda ya rellenada)
+   ========================================================= */
+const SKY_CITY={LON:'lond',PAR:'pari',ROM:'rome',MIL:'mila',NYC:'nyca',TYO:'tyoa',OSA:'osaa',STO:'stoc',CHI:'chia',WAS:'wasa',BUE:'buea',RIO:'rioa',SAO:'saoa',BJS:'bjsa'};
+const skyCode = c => (SKY_CITY[c]||c).toLowerCase();
+const CAB={e:{k:'',s:'economy',t:'turista',tp:0},p:{k:'/premium',s:'premiumeconomy',t:'turista premium',tp:0},b:{k:'/business',s:'business',t:'business',tp:1},f:{k:'/first',s:'first',t:'primera clase',tp:1}};
+const yymmdd = s => s.slice(2).replace(/-/g,'');
+const ddmm = s => s.slice(8,10)+s.slice(5,7);
+const paxTxt = p => [p.ad&&`${p.ad} ${p.ad>1?'adultos':'adulto'}`, p.ch&&`${p.ch} ${p.ch>1?'niños':'niño'}`, p.inf&&`${p.inf} ${p.inf>1?'bebés':'bebé'}`].filter(Boolean).join(', ');
+function kayakLike(base,S){
+  const nb=c=>S.near&&c?`${c},nearby`:c;
+  let path='';
+  if(S.trip==='mc') path=S.legs.map(l=>`${l.from.code}-${l.to.code}/${l.date}`).join('/');
+  else { const fx=S.flex?'-flexible-3days':''; const L=S.legs[0]; path=`${nb(L.from.code)}-${nb(L.to.code)}/${L.date}${fx}${S.trip==='rt'?'/'+S.ret+fx:''}`; }
+  const kids=[...Array(S.pax.ch).fill('11'),...Array(S.pax.inf).fill('1L')];
+  return `${base}${path}/${S.pax.ad}adults${kids.length?'/children-'+kids.join('-'):''}${CAB[S.pax.cabin].k}?sort=bestflight_a${S.direct?'&fs=stops=0':''}`;
+}
+function flightProviders(S){
+  const L=S.legs[0], mc=S.trip==='mc', ex=L.to.kind==='explore';
+  const P=[];
+  if(ex){
+    const f=L.from.code;
+    P.push({n:'Skyscanner · Explorar',tag:'Mapa de precios a todos los destinos desde tu aeropuerto, ordenados de más barato a más caro.',url:`https://www.skyscanner.es/transporte/vuelos-desde/${skyCode(f)}/${yymmdd(L.date)}/${S.trip==='rt'?yymmdd(S.ret)+'/':''}?adultsv2=${S.pax.ad}&rtn=${S.trip==='rt'?1:0}&cabinclass=${CAB[S.pax.cabin].s}`,caps:['Fechas','Pasajeros','Clase']});
+    P.push({n:'Kayak Explore',tag:'Mapa interactivo con el precio más bajo a cada ciudad del mundo.',url:`https://www.kayak.es/explore/${f}-anywhere`,caps:['Origen']});
+    P.push({n:'Google Flights · Explorar',tag:'Destinos y precios en un mapa, con filtros por intereses y duración del viaje.',url:`https://www.google.com/travel/explore?hl=es&curr=EUR&q=${encodeURIComponent('vuelos desde '+f)}`,caps:['Origen']});
+    return P;
+  }
+  const txt = mc ? 'Vuelos multidestino: '+S.legs.map(l=>`${l.from.code} a ${l.to.code} el ${l.date}`).join('; ')
+    : `Vuelos de ${L.from.code} a ${L.to.code} el ${L.date}${S.trip==='rt'?' con vuelta el '+S.ret:' solo ida'}`;
+  const gtxt = `${txt}, ${paxTxt(S.pax)}, clase ${CAB[S.pax.cabin].t}${S.direct?', sin escalas':''}`;
+  if(!mc){
+    const m=CONFIG.travelpayoutsMarker;
+    P.push({n:'Aviasales',tag:'Compara cientos de agencias y aerolíneas. Suele encontrar tarifas de agencias online más baratas.',aff:!!m,
+      url:`https://www.aviasales.com/search/${L.from.code}${ddmm(L.date)}${L.to.code}${S.trip==='rt'?ddmm(S.ret):''}${S.pax.ad}${S.pax.ch||S.pax.inf?S.pax.ch+''+S.pax.inf:''}${m?'?marker='+encodeURIComponent(m):''}`,
+      caps:['Fechas','Pasajeros'],no:[S.pax.cabin!=='e'&&'Clase',S.direct&&'Solo directos',S.flex&&'Flexibles'].filter(Boolean)});
+    const kids=[...Array(S.pax.ch).fill(8),...Array(S.pax.inf).fill(1)].join('|');
+    P.push({n:'Skyscanner',tag:'El comparador más usado en Europa. Muestra el precio total y avisa si una tarifa no incluye maleta.',
+      url:`https://www.skyscanner.es/transporte/vuelos/${skyCode(L.from.code)}/${skyCode(L.to.code)}/${yymmdd(L.date)}/${S.trip==='rt'?yymmdd(S.ret)+'/':''}?adultsv2=${S.pax.ad}${kids?'&childrenv2='+encodeURIComponent(kids):''}&cabinclass=${CAB[S.pax.cabin].s}&rtn=${S.trip==='rt'?1:0}&preferdirects=${S.direct}${S.near?'&outboundaltsenabled=true&inboundaltsenabled=true':''}`,
+      caps:['Fechas','Pasajeros','Clase',S.direct&&'Solo directos',S.near&&'Aeropuertos cercanos'].filter(Boolean),no:[S.flex&&'Flexibles'].filter(Boolean)});
+  }
+  P.push({n:'Kayak',tag:'Gráfico de precios por día y predicción de si el precio va a subir o bajar.',url:kayakLike('https://www.kayak.es/flights/',S),
+    caps:['Fechas','Pasajeros','Clase',S.direct&&'Solo directos',S.flex&&!mc&&'Flexibles ±3',S.near&&!mc&&'Aeropuertos cercanos'].filter(Boolean)});
+  P.push({n:'Momondo',tag:'Del mismo grupo que Kayak, pero con otras agencias: a veces sale más barato.',url:kayakLike('https://www.momondo.es/flight-search/',S),
+    caps:['Fechas','Pasajeros','Clase',S.direct&&'Solo directos',S.flex&&!mc&&'Flexibles ±3',S.near&&!mc&&'Aeropuertos cercanos'].filter(Boolean)});
+  P.push({n:'Google Flights',tag:'Calendario de precios, historial de precios y emisiones de CO₂ de cada vuelo.',url:`https://www.google.com/travel/flights?hl=es&curr=EUR&q=${encodeURIComponent(gtxt)}`,
+    caps:['Fechas','Pasajeros','Clase',S.direct&&'Solo directos',S.flex&&'Flexibles'].filter(Boolean)});
+  return P;
+}
+function hotelProviders(S){
+  const c=S.to.city, kids=S.pax.ch;
+  const P=[];
+  P.push({n:'Booking.com',tag:'La mayor oferta de hoteles y apartamentos. Muchas habitaciones con cancelación gratuita.',
+    url:`https://www.booking.com/searchresults.es.html?ss=${encodeURIComponent(c+(S.to.country?', '+S.to.country:''))}&checkin=${S.d1}&checkout=${S.d2}&group_adults=${S.pax.ad}&group_children=${kids}${Array(kids).fill('&age=8').join('')}&no_rooms=${S.pax.rooms}${CONFIG.bookingAid?'&aid='+encodeURIComponent(CONFIG.bookingAid):''}`,caps:['Fechas','Huéspedes','Habitaciones'],aff:!!CONFIG.bookingAid});
+  P.push({n:'Hotellook',tag:'Compara el precio del mismo hotel en Booking, Agoda, Expedia, Hotels.com y otras.',
+    url:`https://search.hotellook.com/?destination=${encodeURIComponent(c)}&checkIn=${S.d1}&checkOut=${S.d2}&adults=${S.pax.ad}&language=es&currency=eur${CONFIG.travelpayoutsMarker?'&marker='+encodeURIComponent(CONFIG.travelpayoutsMarker):''}`,caps:['Fechas','Adultos'],aff:!!CONFIG.travelpayoutsMarker});
+  P.push({n:'Kayak Hoteles',tag:'Compara cientos de webs de reserva y muestra el precio por noche con impuestos.',
+    url:`https://www.kayak.es/hotels/${encodeURIComponent(c)}/${S.d1}/${S.d2}/${S.pax.ad}adults${kids?'/'+kids+'children':''}${S.pax.rooms>1?'/'+S.pax.rooms+'rooms':''}`,caps:['Fechas','Huéspedes','Habitaciones']});
+  P.push({n:'Airbnb',tag:'Casas y apartamentos enteros: suele compensar para familias o estancias largas.',
+    url:`https://www.airbnb.es/s/${encodeURIComponent(c)}/homes?checkin=${S.d1}&checkout=${S.d2}&adults=${S.pax.ad}&children=${kids}`,caps:['Fechas','Huéspedes']});
+  P.push({n:'Google Hoteles',tag:'Precios de varias webs en un mapa, con opiniones y fotos.',url:`https://www.google.com/travel/search?hl=es&q=${encodeURIComponent('hoteles en '+c)}`,caps:['Destino'],no:['Fechas']});
+  return P;
+}
+function carProviders(S){
+  const c=S.at.kind==='airport'||S.at.kind==='city' ? `${S.at.code}` : S.at.city; const h1=S.t1.slice(0,2), h2=S.t2.slice(0,2);
+  return [
+    {n:'Kayak Coches',tag:'Compara las grandes empresas de alquiler y los intermediarios, con el precio total.',url:`https://www.kayak.es/cars/${encodeURIComponent(c)}/${S.d1}-${h1}h/${S.d2}-${h2}h`,caps:['Lugar','Fechas','Horas']},
+    {n:'Momondo Coches',tag:'Otro comparador con ofertas distintas a las de Kayak.',url:`https://www.momondo.es/car-search/${encodeURIComponent(c)}/${S.d1}-${h1}h/${S.d2}-${h2}h`,caps:['Lugar','Fechas','Horas']},
+    {n:'DiscoverCars',tag:'Seguro a todo riesgo barato y cancelación gratuita hasta 48 h antes.',url:`https://www.discovercars.com/es${CONFIG.discoverCarsId?'?a_aid='+encodeURIComponent(CONFIG.discoverCarsId):''}`,caps:[],no:['Búsqueda: introdúcela allí'],aff:!!CONFIG.discoverCarsId},
+    {n:'Rentalcars',tag:'Muchas oficinas en aeropuertos y opiniones de otros clientes.',url:'https://www.rentalcars.com/es/',caps:[],no:['Búsqueda: introdúcela allí']}
+  ];
+}
+function groundProviders(S){
+  const o=S.from.city, d=S.to.city, P=[];
+  P.push({n:'Rome2rio',tag:'Todas las formas de llegar (tren, bus, ferri, coche y avión) con horarios y precios orientativos.',url:`https://www.rome2rio.com/es/map/${encodeURIComponent(o)}/${encodeURIComponent(d)}`,caps:['Origen','Destino']});
+  if(S.modes.train||S.modes.bus){
+    P.push({n:'Omio',tag:'Trenes, autobuses y vuelos de Europa en una sola búsqueda. Billetes en el móvil.',url:`https://www.omio.es/${CONFIG.omioPartnerId?'?partner_id='+encodeURIComponent(CONFIG.omioPartnerId):''}`,caps:[],no:['Búsqueda: introdúcela allí'],aff:!!CONFIG.omioPartnerId});
+  }
+  if(S.modes.train) P.push({n:'Trainline',tag:'Trenes de España y Europa: Renfe, Iryo, Ouigo, SNCF, Trenitalia y más.',url:'https://www.thetrainline.com/es',caps:[],no:['Búsqueda: introdúcela allí']});
+  if(S.modes.bus) P.push({n:'FlixBus',tag:'Autobuses baratos por toda Europa y América.',url:'https://www.flixbus.es/',caps:[],no:['Búsqueda: introdúcela allí']});
+  if(S.modes.car) P.push({n:'BlaBlaCar',tag:'Viajes en coche compartido y autobuses BlaBlaCar.',url:`https://www.blablacar.es/search?fn=${encodeURIComponent(o)}&tn=${encodeURIComponent(d)}&db=${S.d1}&seats=${S.pax}`,caps:['Origen','Destino','Fecha','Plazas']});
+  if(S.modes.ferry){
+    P.push({n:'Direct Ferries',tag:'Compara navieras de todo el mundo en una sola web.',url:`https://www.directferries.es/${CONFIG.directFerriesId?'?aff='+encodeURIComponent(CONFIG.directFerriesId):''}`,caps:[],no:['Búsqueda: introdúcela allí'],aff:!!CONFIG.directFerriesId});
+    P.push({n:'Ferryhopper',tag:'Ferris por las islas griegas, Italia, España y más, con combinaciones de varios trayectos.',url:'https://www.ferryhopper.com/es/',caps:[],no:['Búsqueda: introdúcela allí']});
+  }
+  return P;
+}
+
+/* ---------- precios reales (opcional, con token de Travelpayouts) ---------- */
+const WEEK=['dom','lun','mar','mié','jue','vie','sáb'];
+const fmtW = s => { const d=new Date(s+'T12:00:00'); return `${WEEK[d.getDay()]} ${d.getDate()} ${MES[d.getMonth()]}`; };
+const stops = n => n ? `${n} ${n>1?'escalas':'escala'}` : 'Directo';
+async function priceApi(params){
+  if(!CONFIG.pricesApi || location.protocol==='file:') return null;
+  const r=await fetch(CONFIG.pricesApi+'?'+new URLSearchParams(params)); if(!r.ok) return null;
+  const d=await r.json(); return d && d.results ? d : null;
+}
+async function livePrices(S){
+  const box=$('livePrices'); box.innerHTML='';
+  if(S.trip==='mc' || S.legs[0].to.kind==='explore') return;
+  const L=S.legs[0], seq=runSeq;
+  box.innerHTML='<div class="card prices"><p class="loading">Buscando precios reales para tus fechas…</p></div>';
+  let d=null;
+  try{
+    const base={origin:L.from.code,to:L.to.code,one_way:S.trip!=='rt',direct:S.direct,limit:5};
+    d=await priceApi({...base,depart:L.date,...(S.trip==='rt'?{return:S.ret}:{})});
+    let offers=d?.results?.[0]?.offers||[], exact=true;
+    if(!offers.length){ d=await priceApi({...base,depart:L.date.slice(0,7)}); offers=d?.results?.[0]?.offers||[]; exact=false; }
+    if(seq!==runSeq) return;
+    if(!offers.length){ box.innerHTML=''; return; }
+    box.innerHTML=`<div class="card prices"><h3>${exact?'Precios reales para tus fechas':'Precios reales cerca de tus fechas'}</h3><p class="sub">Tarifas de Aviasales encontradas en las últimas horas, por persona${S.trip==='rt'?', ida y vuelta':''}. Pueden cambiar: confírmalas al reservar.</p>
+      ${offers.map(x=>`<div class="prow2"><div><b>${esc(fmtW(x.depart))}${x.ret?' → '+esc(fmtW(x.ret)):''}</b><br><small>${esc(x.airline||'')} · ${stops(x.transfers)}${x.ret?' / '+stops(x.returnTransfers):''} · ${esc(x.origin||'')}–${esc(x.destination||'')}</small></div><div class="pp">${x.price} €</div>
+      <a class="gobook" target="_blank" rel="noopener sponsored" href="${esc(x.link||'#')}">Ver</a></div>`).join('')}</div>`;
+  }catch(e){ box.innerHTML=''; }
+}
+
+/* =========================================================
+   RESULTADOS
+   ========================================================= */
+let current=null, runSeq=0;
+// Inserta un widget de Travelpayouts (se dibuja justo donde está su <script>)
+function tpWidget(el,base,extra){
+  if(!base) return; const u=new URL(base.startsWith('http')?base:'https:'+base);
+  Object.entries(extra||{}).forEach(([k,v])=>{ if(v!=null&&v!=='') u.searchParams.set(k,v); });
+  const box=document.createElement('div'); box.className='tpbox'; el.appendChild(box);
+  const sc=document.createElement('script'); sc.async=true; sc.charset='utf-8'; sc.src=u.toString(); box.appendChild(sc);
+}
+function renderWidgets(S){
+  const el=$('tpWidgets'); el.innerHTML='';
+  if(S.tab!=='vuelos' || S.trip==='mc') return;
+  const L=S.legs[0]; if(L.to.kind==='explore') return;
+  const av=flightProviders(S).find(p=>p.n==='Aviasales');
+  const head=document.createElement('div'); head.className='card realp';
+  head.innerHTML=`<div class="realhead"><div><div class="eyebrow">Precios reales</div><h3>${esc(destCity(L.from))} → ${esc(destCity(L.to))}</h3><p>Aviasales compara cientos de aerolíneas y agencias en tiempo real. Tu búsqueda ya va rellenada.</p></div>
+    ${av?`<a class="gobook big" href="${esc(av.url)}" target="_blank" rel="noopener sponsored">Ver vuelos y precios ${ICO.ext}</a>`:''}</div>`;
+  el.appendChild(head);
+  if(CONFIG.calendarWidget){ const c=document.createElement('div'); c.className='card tpcard'; c.innerHTML='<h3>Calendario de precios reales</h3><p class="sub">El precio más barato encontrado para cada día en esta ruta. Pulsa un día para ver los vuelos en Aviasales.</p>'; el.appendChild(c);
+    const nights=S.trip==='rt'?Math.max(1,Math.round((new Date(S.ret)-new Date(L.date))/864e5)):0;
+    tpWidget(c,CONFIG.calendarWidget,{origin:L.from.code,destination:L.to.code,one_way:S.trip!=='rt',only_direct:S.direct,range:nights?`${Math.max(1,nights-3)},${nights+3}`:null}); }
+  if(CONFIG.aviasalesWidget){ const w=document.createElement('div'); w.className='card tpcard'; w.innerHTML='<h3>Cambia fechas o destino</h3><p class="sub">Busca otra combinación con precios en directo de Aviasales.</p>'; el.appendChild(w);
+    tpWidget(w,CONFIG.aviasalesWidget,{origin:L.from.code,destination:L.to.code}); }
+}
+function provHTML(p,i){
+  return `<div class="card prov"><div><div class="pname">${esc(p.n)}${i===0&&current&&current.tab!=='vuelos'?' <span class="badge">Empieza aquí</span>':''}</div><div class="ptag">${esc(p.tag)}</div></div>
+    <a class="gobook" href="${esc(p.url)}" target="_blank" rel="noopener${p.aff?' sponsored':''}">Ver precios ${ICO.ext}</a>
+    <div class="caps">${(p.caps||[]).map(c=>`<span class="cap">✓ ${esc(c)}</span>`).join('')}${(p.no||[]).map(c=>`<span class="cap no">${esc(c)}: elígelo allí</span>`).join('')}</div></div>`;
+}
+function xsellHTML(items){ return `<div class="xsell">${items.map(x=>`<a href="${esc(x.url)}" target="_blank" rel="noopener sponsored"><span>${esc(x.t)}<small>${esc(x.s)}</small></span><span class="arr">↗</span></a>`).join('')}</div>`; }
+function destCity(s){ return s ? (s.city||shortAp(s.name)) : ''; }
+function sideFlight(S){
+  const L=S.legs[0]; if(L.to.kind==='explore') return '';
+  const segs=S.legs.map(l=>km([l.from.lat,l.from.lon],[l.to.lat,l.to.lon]));
+  const dist=segs.reduce((a,b)=>a+b,0)*(S.trip==='rt'?2:1);
+  const one=segs[0]; const mins=Math.round(one/780*60+35);
+  const co2=Math.round(one*(one<1500?0.13:0.1)*(S.trip==='rt'?2:1)*({e:1,p:1.5,b:2.9,f:4}[S.pax.cabin]));
+  const city=destCity(S.legs[S.legs.length-1].to); const d1=S.trip==='mc'?S.legs[S.legs.length-1].date:L.date; const d2=S.trip==='rt'?S.ret:addDays(d1,3);
+  const T=S.legs[S.legs.length-1].to;
+  let h=`<div class="card"><h3>Tu viaje</h3><dl class="kv">
+    <dt>Distancia${S.trip==='rt'?' (ida y vuelta)':''}</dt><dd>${Math.round(dist).toLocaleString('es-ES')} km</dd>
+    ${S.trip!=='mc'?`<dt>Vuelo directo</dt><dd>≈ ${dur(mins)}</dd>`:''}
+    <dt>CO₂ por pasajero</dt><dd>≈ ${co2.toLocaleString('es-ES')} kg</dd>
+    ${T.distKm!=null?`<dt>Aeropuerto a ${esc(T.city)}</dt><dd>${T.distKm} km</dd>`:''}
+  </dl><p style="margin:.6rem 0 0;font-size:.78rem;color:var(--muted)">Estimaciones orientativas. El CO₂ es una media por pasajero según la distancia y la clase.</p></div>`;
+  h+=`<div class="card"><h3>Completa tu viaje</h3>${xsellHTML([
+    {t:`Hoteles en ${city}`,s:`${fmt(d1)} – ${fmt(d2)} · ${S.pax.ad+S.pax.ch} ${S.pax.ad+S.pax.ch>1?'personas':'persona'}`,url:hotelProviders({to:{city,country:T.country},d1,d2,pax:{ad:S.pax.ad,ch:S.pax.ch,rooms:1}})[0].url},
+    {t:'Alquiler de coche',s:`Recogida en ${T.code} · ${fmt(d1)}`,url:carProviders({at:T,d1,d2,t1:'10:00',t2:'10:00'})[0].url},
+    {t:`Del aeropuerto al centro`,s:'Tren, bus, taxi y traslados',url:`https://www.rome2rio.com/es/map/${encodeURIComponent(shortAp(T.name)||T.code)}/${encodeURIComponent(city)}`},
+    {t:`Tours y entradas en ${city}`,s:'Visitas guiadas y excursiones',url:activityLinkCity(T.ck,city)}
+  ])}</div>`;
+  return h;
+}
+function activityLinkCity(ck,city,what=''){
+  if(ck && CITIES[ck] && CITIES[ck].slug && !what){ const base=`https://www.civitatis.com/es/${CITIES[ck].slug}/`; return CONFIG.civitatisAid?base+'?aid='+encodeURIComponent(CONFIG.civitatisAid):base; }
+  const u='https://www.getyourguide.es/s/?q='+encodeURIComponent((what?what+' ':'')+city); return CONFIG.getyourguideId?u+'&partner_id='+encodeURIComponent(CONFIG.getyourguideId):u;
+}
+function airportChips(S){
+  if(S.tab!=='vuelos' || S.trip==='mc') return '';
+  const L=S.legs[0], parts=[];
+  const chipsFor=(side,s)=>{
+    if(!s || s.kind==='explore') return '';
+    let alts=[];
+    const local=AIRPORTS.filter(a=>a.city===s.city);
+    if(local.length>1) alts=local.map(a=>({code:a.code,label:a.all?`Todos (${a.code})`:`${a.code} · ${a.name}`,sel:apToSel(a)}));
+    else if(s.alts && s.alts.length>1) alts=s.alts.map(a=>({code:a.code,label:`${a.code} · ${shortAp(a.name)} · ${a.km} km`,sel:{...s,code:a.code,name:a.name,lat:a.lat,lon:a.lon,distKm:a.km}}));
+    if(alts.length<2) return '';
+    return `<span>${side}:</span>`+alts.map((a,i)=>`<button type="button" class="apchip" data-side="${side==='Salida'?'from':'to'}" data-i="${i}" aria-pressed="${a.code===s.code}">${esc(a.label)}</button>`).join('');
+  };
+  const f=chipsFor('Salida',L.from), t=chipsFor('Llegada',L.to);
+  apAlts={from:altList(L.from),to:altList(L.to)};
+  return f+(f&&t?'<span style="width:1rem"></span>':'')+t;
+}
+let apAlts={from:[],to:[]};
+function altList(s){ if(!s||s.kind==='explore') return []; const local=AIRPORTS.filter(a=>a.city===s.city); if(local.length>1) return local.map(apToSel);
+  if(s.alts&&s.alts.length>1) return s.alts.map(a=>({...s,code:a.code,name:a.name,lat:a.lat,lon:a.lon,distKm:a.km})); return []; }
+
+async function showResults(S,{scroll=true,save=true}={}){
+  current=S; const seq=++runSeq;
+  $('resultados').hidden=false; $('livePrices').innerHTML=''; $('apPick').innerHTML='';
+  let eyebrow='', title='', meta='', provs=[], side='', hint='', cityForTodo=null;
+  if(S.tab==='vuelos'){
+    const L=S.legs[0], last=S.legs[S.legs.length-1];
+    eyebrow = {rt:'Vuelos · ida y vuelta',ow:'Vuelos · solo ida',mc:'Vuelos · multidestino'}[S.trip];
+    title = S.trip==='mc' ? S.legs.map(l=>l.from.code).concat(last.to.code).join(' → ') : `${destCity(L.from)} (${L.from.code}) → ${L.to.kind==='explore'?'Cualquier destino':destCity(L.to)+' ('+L.to.code+')'}`;
+    meta = [S.trip==='mc'?S.legs.map(l=>fmt(l.date)).join(' · '):fmt(L.date)+(S.trip==='rt'?' – '+fmt(S.ret):''), paxTxt(S.pax), CAB[S.pax.cabin].t[0].toUpperCase()+CAB[S.pax.cabin].t.slice(1), S.direct&&'Solo directos', S.flex&&'Fechas flexibles'].filter(Boolean).join(' · ');
+    provs=flightProviders(S); side=sideFlight(S);
+    hint = L.to.kind==='explore' ? 'Elige un buscador para ver en un mapa los destinos más baratos desde tu aeropuerto.' : 'Abre al menos dos buscadores: cada uno trabaja con agencias distintas y los precios cambian entre ellos. Tu búsqueda ya va rellenada.';
+    if(S.trip==='mc') hint+=' Aviasales y Skyscanner no aceptan multidestino por enlace, por eso no aparecen.';
+    cityForTodo = last.to.kind==='explore'?null:last.to;
+    $('apPick').innerHTML=airportChips(S);
+    livePrices(S);
+  } else if(S.tab==='hotel'){
+    const n=Math.round((new Date(S.d2)-new Date(S.d1))/864e5);
+    eyebrow='Hoteles y alojamiento'; title=`Alojamiento en ${S.to.city}`; meta=`${fmt(S.d1)} – ${fmt(S.d2)} · ${n} ${n===1?'noche':'noches'} · ${S.pax.ad+S.pax.ch} huéspedes · ${S.pax.rooms} ${S.pax.rooms>1?'habitaciones':'habitación'}`;
+    provs=hotelProviders(S); hint='Compara el mismo hotel en varias webs: el precio por noche puede cambiar bastante. Fíjate en si incluye impuestos y cancelación gratuita.';
+    side=`<div class="card"><h3>Completa tu viaje</h3>${xsellHTML([{t:`Vuelos a ${S.to.city}`,s:'Busca vuelos para estas fechas',url:'#'},{t:`Tours y entradas en ${S.to.city}`,s:'Visitas guiadas y excursiones',url:activityLinkCity(S.to.ck,S.to.city)}])}</div>`;
+    cityForTodo=S.to;
+  } else if(S.tab==='coche'){
+    const n=Math.max(1,Math.round((new Date(S.d2)-new Date(S.d1))/864e5));
+    eyebrow='Alquiler de coches'; title=`Coches en ${destCity(S.at)}${S.at.code?' ('+S.at.code+')':''}`; meta=`${fmt(S.d1)} ${S.t1} – ${fmt(S.d2)} ${S.t2} · ${n} ${n===1?'día':'días'}`;
+    provs=carProviders(S); hint='Revisa la política de combustible (mejor «lleno/lleno») y la franquicia del seguro antes de pagar.';
+    cityForTodo=S.at;
+  } else {
+    eyebrow='Trenes, autobuses y ferris'; title=`${S.from.city} → ${S.to.city}`; meta=[fmt(S.d1)+(S.d2?' – '+fmt(S.d2):''),`${S.pax} ${S.pax>1?'pasajeros':'pasajero'}`].join(' · ');
+    provs=groundProviders(S); hint='Rome2rio te enseña todas las opciones con horarios y precios orientativos. Luego reserva en la web del operador o en Omio o Trainline.';
+    const dist=km([S.from.lat,S.from.lon],[S.to.lat,S.to.lon]);
+    side=`<div class="card"><h3>Tu viaje</h3><dl class="kv"><dt>Distancia en línea recta</dt><dd>${Math.round(dist).toLocaleString('es-ES')} km</dd><dt>En tren de alta velocidad</dt><dd>≈ ${dur(Math.round(dist*1.2/220*60))}</dd><dt>En autobús</dt><dd>≈ ${dur(Math.round(dist*1.25/75*60))}</dd></dl><p style="margin:.6rem 0 0;font-size:.78rem;color:var(--muted)">Tiempos aproximados, sin contar esperas ni transbordos.</p></div>`;
+    cityForTodo=S.to;
+  }
+  $('sumEyebrow').textContent=eyebrow; $('sumTitle').textContent=title; $('sumMeta').textContent=meta;
+  if(S.tab==='vuelos' && S.trip!=='mc'){ provs=provs.filter(p=>p.n!=='Aviasales'); hint=''; }
+  renderWidgets(S);
+  $('provHint').textContent=hint; $('provs').innerHTML=provs.map(provHTML).join(''); $('side').innerHTML=side;
+  if(S.tab==='hotel'){ const a=$('side').querySelector('a[href="#"]'); if(a){ a.removeAttribute('target'); a.onclick=e=>{ e.preventDefault(); tab='vuelos'; syncTabs(); setSel($('f-to'),null); $('f-to').value=S.to.city; $('f-d1').value=S.d1; $('f-d2').value=S.d2; window.scrollTo({top:0,behavior:'smooth'}); $('f-from').focus(); }; } }
+  document.querySelectorAll('.apchip').forEach(b=>b.onclick=()=>{ const side=b.dataset.side, s=apAlts[side][+b.dataset.i]; if(!s) return; const N=JSON.parse(JSON.stringify(current)); N.legs[0][side]={...s,alts:current.legs[0][side].alts,city:current.legs[0][side].city}; fillForm(N); showResults(N,{scroll:false}); });
+  if(save){ saveRecent(S); try{ history.replaceState(null,'','?s='+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(slim(S))))))); }catch(e){} }
+  if(scroll) $('resultados').scrollIntoView({behavior:'smooth',block:'start'});
+  // Qué ver al llegar
+  await renderTodoFor(cityForTodo, seq);
+}
+function slim(S){ return JSON.parse(JSON.stringify(S,(k,v)=>k==='alts'&&Array.isArray(v)?v.slice(0,4):v)); }
+
+/* ---------- qué ver al llegar ---------- */
+const loadingCards = n => Array.from({length:n},()=>`<article class="spot skeleton"><div class="art"></div><div class="body"><h3>&nbsp;</h3><p>&nbsp;<br>&nbsp;</p></div></article>`).join('');
+async function renderTodoFor(s, seq){
+  const sec=$('quehacer');
+  if(!s || s.kind==='explore'){ sec.hidden=true; return; }
+  let key = s.ck && CITIES[s.ck] ? s.ck : findCity(s.city);
+  const cityName = s.city || shortAp(s.name);
+  if(key && TODO[key]){
+    const D=CITIES[key];
+    sec.hidden=false; $('todoTitle').textContent=`Los 3 imprescindibles de ${D.n}`; $('todoIntro').textContent=TODO[key].intro;
+    $('todo').innerHTML=TODO[key].items.map((it,i)=>`<article class="spot">
+      <div class="art">${(ART[it.art]||ART.generic)()}${photo((TODO_PHOTOS[key]||[])[i],it.t)}<span class="rank">Nº ${i+1}</span></div>
+      <div class="body"><h3>${esc(it.t)}</h3><p>${esc(it.d)}</p>
+        <div class="facts"><span>Duración: ${esc(it.dur)}</span><span>${esc(D.pais)}</span></div>
+        <div class="spotlinks"><a class="gobook" target="_blank" rel="noopener sponsored" href="${esc(activityLinkCity(key,D.n))}">Ver entradas</a>
+        <a class="maplink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(it.t+' '+D.n)}">Ver en el mapa</a></div></div></article>`).join('');
+    return;
+  }
+  sec.hidden=false; $('todoTitle').textContent=`Lo más famoso de ${cityName}`; $('todoIntro').textContent='Buscando los lugares más visitados…'; $('todo').innerHTML=loadingCards(3);
+  try{
+    if(!key){
+      const ll = s.place ? [s.place.lat,s.place.lon] : null;
+      if(ll){ key='w:'+cityName+ll.join(','); if(!CITIES[key]) CITIES[key]={n:cityName,ll,pais:s.country||'',dyn:true,art:'playa'}; }
+      else key=await resolvePlace(cityName+(s.country?' '+s.country:''));
+    }
+  }catch(e){ key=null; }
+  if(seq!==runSeq) return;
+  if(!key){ sec.hidden=true; return; }
+  let top=[]; try{ top=await famousNear(key); }catch(e){}
+  if(seq!==runSeq) return;
+  const D=CITIES[key];
+  if(!top.length){ $('todoIntro').textContent=`No hemos encontrado lugares destacados con foto cerca de ${cityName}.`; $('todo').innerHTML=''; return; }
+  $('todoIntro').textContent=`Los lugares más consultados en Wikipedia cerca de ${cityName}${D.pais?' ('+D.pais+')':''}.`;
+  $('todo').innerHTML=top.map((p,i)=>`<article class="spot">
+      <div class="art">${ART.generic()}<img class="ph" src="${esc(p.img)}" alt="${esc(p.label)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"><span class="rank">Nº ${i+1}</span></div>
+      <div class="body"><h3>${esc(p.label)}</h3><p>${esc(p.text)}</p>
+        <div class="facts"><span>A ${p.km<1?'menos de 1':Math.round(p.km)} km del centro</span>${D.pais?`<span>${esc(D.pais)}</span>`:''}</div>
+        <div class="spotlinks"><a class="gobook" target="_blank" rel="noopener sponsored" href="${esc(activityLinkCity('',cityName,p.label))}">Entradas y tours</a>
+        <a class="maplink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.label+' '+cityName)}">Ver en el mapa</a></div></div></article>`).join('');
+}
+
+/* ---------- enviar formulario ---------- */
+async function collect(){
+  const err=m=>{ $('formErr').textContent=m; return null; };
+  $('formErr').textContent='';
+  if(tab==='vuelos'){
+    const t=trip(), pax=paxFlight.get();
+    const S={tab,trip:t,pax,direct:$('o-direct').checked,flex:$('o-flex').checked,near:$('o-near').checked,legs:[]};
+    if(t==='mc'){
+      for(const row of $('legs').children){ const [fi,ti,di]=row.querySelectorAll('input');
+        const [f,to]=await Promise.all([resolveInput(fi),resolveInput(ti)]);
+        if(!f||!to) return err('Revisa los aeropuertos de todos los trayectos.'); if(!di.value) return err('Falta la fecha de algún trayecto.');
+        S.legs.push({from:f,to,date:di.value}); }
+      for(let i=1;i<S.legs.length;i++) if(S.legs[i].date<S.legs[i-1].date) return err('Las fechas de los trayectos deben ir en orden.');
+    } else {
+      $('formErr').innerHTML='<span class="loading">Buscando aeropuertos…</span>';
+      const [f,to]=await Promise.all([resolveInput($('f-from')),resolveInput($('f-to'))]); $('formErr').textContent='';
+      if(!f) return err('Elige el aeropuerto o la ciudad de origen.'); if(!to) return err('Elige el destino: una ciudad, un aeropuerto o un país.');
+      if(to.kind!=='explore' && f.code===to.code) return err('El origen y el destino son el mismo aeropuerto.');
+      const d1=$('f-d1').value, d2=$('f-d2').value;
+      if(!d1) return err('Elige la fecha de ida.'); if(t==='rt'&&!d2) return err('Elige la fecha de vuelta o marca «Solo ida».'); if(t==='rt'&&d2<d1) return err('La vuelta no puede ser antes que la ida.');
+      S.legs.push({from:f,to,date:d1}); if(t==='rt') S.ret=d2;
+    }
+    return S;
+  }
+  if(tab==='hotel'){
+    const to=await resolveInput($('h-to')); if(!to) return err('Escribe la ciudad o el lugar donde quieres alojarte.');
+    const d1=$('h-d1').value,d2=$('h-d2').value; if(!d1||!d2) return err('Elige las fechas de entrada y salida.'); if(d2<=d1) return err('La salida debe ser después de la entrada.');
+    return {tab,to,d1,d2,pax:paxHotel.get()};
+  }
+  if(tab==='coche'){
+    const at=await resolveInput($('c-at')); if(!at) return err('Escribe dónde quieres recoger el coche.');
+    const d1=$('c-d1').value,d2=$('c-d2').value; if(!d1||!d2) return err('Elige las fechas de recogida y devolución.'); if(d2<d1) return err('La devolución no puede ser antes que la recogida.');
+    return {tab,at,d1,d2,t1:$('c-t1').value,t2:$('c-t2').value};
+  }
+  const [f,to]=await Promise.all([resolveInput($('g-from')),resolveInput($('g-to'))]);
+  if(!f||!to) return err('Escribe la ciudad de origen y la de destino.'); if(!$('g-d1').value) return err('Elige la fecha de ida.');
+  const modes={train:$('g-train').checked,bus:$('g-bus').checked,ferry:$('g-ferry').checked,car:$('g-car').checked};
+  if(!Object.values(modes).some(Boolean)) return err('Marca al menos un tipo de transporte.');
+  return {tab,from:f,to,d1:$('g-d1').value,d2:$('g-d2').value,pax:+$('g-pax').value,modes};
+}
+$('searchForm').addEventListener('submit',async e=>{ e.preventDefault(); const S=await collect(); if(S) showResults(S); });
+
+/* ---------- rellenar el formulario desde una búsqueda guardada ---------- */
+function fillForm(S){
+  tab=S.tab; syncTabs();
+  if(S.tab==='vuelos'){
+    document.getElementById('trip-'+S.trip).checked=true;
+    if(S.trip==='mc'){ $('legs').innerHTML=''; S.legs.forEach(l=>addLeg(l.from,l.to,l.date)); }
+    else { setSel($('f-from'),S.legs[0].from); setSel($('f-to'),S.legs[0].to); $('f-d1').value=S.legs[0].date; if(S.ret) $('f-d2').value=S.ret; }
+    syncTrip(); paxFlight.set(S.pax); $('o-direct').checked=!!S.direct; $('o-flex').checked=!!S.flex; $('o-near').checked=!!S.near;
+  } else if(S.tab==='hotel'){ setSel($('h-to'),S.to); $('h-d1').value=S.d1; $('h-d2').value=S.d2; paxHotel.set(S.pax); }
+  else if(S.tab==='coche'){ setSel($('c-at'),S.at); $('c-d1').value=S.d1; $('c-d2').value=S.d2; $('c-t1').value=S.t1; $('c-t2').value=S.t2; }
+  else { setSel($('g-from'),S.from); setSel($('g-to'),S.to); $('g-d1').value=S.d1; $('g-d2').value=S.d2||''; $('g-pax').value=S.pax; Object.entries(S.modes||{}).forEach(([k,v])=>$('g-'+k).checked=v); }
+}
+function outdated(S){ const t=iso(TODAY); const d=S.tab==='vuelos'?S.legs[0].date:S.d1; return d<t; }
+
+/* ---------- búsquedas recientes ---------- */
+function recentLabel(S){
+  if(S.tab==='vuelos'){ const L=S.legs[0]; return S.trip==='mc'?S.legs.map(l=>l.from.code).concat(S.legs[S.legs.length-1].to.code).join('→'):`${L.from.code} → ${L.to.kind==='explore'?'Cualquier lugar':L.to.code} · ${fmt(L.date)}${S.ret?'–'+fmt(S.ret):''}`; }
+  if(S.tab==='hotel') return `Hotel en ${S.to.city} · ${fmt(S.d1)}`;
+  if(S.tab==='coche') return `Coche en ${destCity(S.at)} · ${fmt(S.d1)}`;
+  return `${S.from.city} → ${S.to.city} · ${fmt(S.d1)}`;
+}
+function saveRecent(S){ const L=store.get('magtravel.recent',[]).filter(x=>recentLabel(x)!==recentLabel(S)); L.unshift(slim(S)); store.set('magtravel.recent',L.slice(0,5)); paintRecent(); }
+function paintRecent(){
+  const L=store.get('magtravel.recent',[]).filter(S=>!outdated(S)); const el=$('recent');
+  if(!L.length){ el.hidden=true; return; }
+  el.hidden=false; el.innerHTML='<span>Tus búsquedas recientes:</span>'+L.map((S,i)=>`<button type="button" class="rchip" data-i="${i}">${esc(recentLabel(S))}</button>`).join('');
+  el.querySelectorAll('.rchip').forEach(b=>b.onclick=()=>{ const S=L[+b.dataset.i]; fillForm(S); showResults(S,{save:false}); });
+}
+
+/* ---------- acciones de resultados ---------- */
+$('editBtn').onclick=()=>{ window.scrollTo({top:0,behavior:'smooth'}); const f=document.querySelector('.panel:not([hidden]) input'); if(f) setTimeout(()=>f.focus(),400); };
+$('shareBtn').onclick=async()=>{ const b=$('shareBtn'); try{ await navigator.clipboard.writeText(location.href); b.textContent='Enlace copiado'; }catch(e){ b.textContent='Copia la dirección de la barra del navegador'; } setTimeout(()=>b.textContent='Copiar enlace',2500); };
+
+/* ---------- explorar desde tu ciudad ---------- */
+function paintExplore(){
+  const s=SEL['f-from']; const code=s&&s.code?s.code:'MAD'; const city=s?destCity(s):'Madrid';
+  $('exploreLinks').innerHTML=`<a class="gobook alt" target="_blank" rel="noopener" href="https://www.skyscanner.es/transporte/vuelos-desde/${skyCode(code)}/">Destinos más baratos desde ${esc(city)} en Skyscanner ${ICO.ext}</a>
+    <a class="gobook alt" target="_blank" rel="noopener" href="https://www.kayak.es/explore/${code}-anywhere">Mapa de precios desde ${esc(city)} en Kayak ${ICO.ext}</a>`;
+}
+
+
+/* ---------- inicio ---------- */
+$('heroArt').innerHTML = SVG(sun(210,62,24)+`<path d="M0 118 C60 104 120 112 170 108 S260 100 300 106 V200 H0z" fill="#2A8C8A" opacity=".5"/>`+sea(118)+`<path d="M0 170 C70 156 150 162 300 150 V200 H0z" fill="#F3DDB1"/>`+palm(262,178,.95)+boat(150,128),['#8FD3E8','#F6D7A7']);
+$('heroArt').insertAdjacentHTML('beforeend', photo('hero','Caló des Moro, Mallorca',true));
+setSel($('f-from'),apToSel(AP_BY_CODE.MAD)); setSel($('g-from'),{kind:'place',city:'Madrid',country:'España',lat:40.42,lon:-3.70,ck:'madrid'});
+syncTabs(); syncTrip(); paintRecent();
+/* ---------- escapadas baratas desde Madrid ---------- */
+const DEALS=[
+  {code:'LIS',photo:'lisboa',art:'lisboa',why:'Tranvías, miradores y pastéis de nata',tag:'Fin de semana'},
+  {code:'RAK',photo:'marrakech_0',art:'fountain',why:'Zocos, riads y el desierto a un paso',tag:'Otro continente'},
+  {code:'ROM',photo:'coliseo',art:'roma',why:'El Coliseo, el Vaticano y la mejor pasta',tag:'Clásico'},
+  {code:'BUD',photo:'budapest_0',art:'dome',why:'Balnearios termales y precios bajos',tag:'Buen precio allí'},
+  {code:'PRG',photo:'praga_0',art:'castle',why:'Un casco histórico de cuento',tag:'Buen precio allí'},
+  {code:'TFS',photo:'teide',art:'tenerife',why:'Playa y volcán con buen tiempo todo el año',tag:'Sol en invierno'}
+];
+function paintDeals(){
+  const MAD=AP_BY_CODE.MAD;
+  $('deals').innerHTML=DEALS.map((d,i)=>{ const a=AP_BY_CODE[d.code]; const mins=Math.round(km([MAD.lat,MAD.lon],[a.lat,a.lon])/780*60+35);
+    return `<button type="button" class="deal" data-i="${i}" aria-label="Ver precios reales de vuelos de Madrid a ${esc(a.city)}">${(ART[d.art]||ART.generic)()}${photo(d.photo,a.city)}
+      <span class="flag">${esc(d.tag)}</span>
+      <span class="dcap"><b>${esc(a.city)}</b><span class="why">${esc(d.why)}</span>
+      <span class="row"><span class="pill">✈ Directo · ≈ ${dur(mins)}</span><span class="cta">Ver precios</span></span></span></button>`; }).join('');
+  document.querySelectorAll('.deal').forEach(b=>b.onclick=()=>{
+    const d=DEALS[+b.dataset.i];
+    tab='vuelos'; syncTabs(); document.getElementById('trip-rt').checked=true; syncTrip();
+    setSel($('f-from'),apToSel(AP_BY_CODE.MAD)); setSel($('f-to'),apToSel(AP_BY_CODE[d.code]));
+    const S={tab:'vuelos',trip:'rt',pax:paxFlight.get(),direct:$('o-direct').checked,flex:$('o-flex').checked,near:$('o-near').checked,
+      legs:[{from:SEL['f-from'],to:SEL['f-to'],date:$('f-d1').value}],ret:$('f-d2').value};
+    if(d.offer && d.offer.depart>=iso(TODAY)){ S.legs[0].date=d.offer.depart; $('f-d1').value=d.offer.depart; if(d.offer.ret){ S.ret=d.offer.ret; $('f-d2').value=d.offer.ret; } }
+    showResults(S);
+  });
+}
+paintDeals();
+(async function dealPrices(){
+  try{
+    const d=await priceApi({origin:'MAD',to:DEALS.map(x=>x.code).join(','),one_way:false,limit:1}); if(!d) return;
+    let any=false;
+    d.results.forEach(r=>{ const i=DEALS.findIndex(x=>x.code===r.to); const o=r.offers&&r.offers[0]; if(i<0||!o) return; any=true; DEALS[i].offer=o;
+      const card=document.querySelector(`.deal[data-i="${i}"]`); if(!card) return;
+      card.querySelector('.pill').innerHTML=`${esc(fmt(o.depart))}${o.ret?' – '+esc(fmt(o.ret)):''} · ${o.transfers?stops(o.transfers):'Directo'}`;
+      card.querySelector('.cta').innerHTML=`desde <b>${o.price} €</b>`;
+      card.setAttribute('aria-label',`Madrid a ${AP_BY_CODE[DEALS[i].code].city}: ida y vuelta desde ${o.price} euros`); });
+    if(any) $('dealNote').textContent='Precio más barato por persona, ida y vuelta, encontrado en Aviasales en las últimas horas. Puede cambiar: pulsa para ver el calendario completo.';
+  }catch(e){}
+})();
+
+(function(){ try{ const p=new URLSearchParams(location.search).get('s'); if(!p) return; const S=JSON.parse(decodeURIComponent(escape(atob(p)))); if(S&&S.tab&&!outdated(S)){ fillForm(S); showResults(S,{save:false,scroll:true}); } }catch(e){} })();
+
+</script>
+
+</body>
+</html>

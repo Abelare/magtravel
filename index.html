@@ -1439,6 +1439,7 @@ async function priceApi(params){
 }
 async function livePrices(S){
   const box=$('livePrices'); box.innerHTML='';
+    return; // Desactivado: los precios en caché podían quedar desactualizados. Usamos el widget en vivo en su lugar.
   if(S.trip==='mc' || S.legs[0].to.kind==='explore') return;
   const L=S.legs[0], seq=runSeq;
   box.innerHTML='<div class="card prices"><p class="loading">Buscando precios reales para tus fechas…</p></div>';

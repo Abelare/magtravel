@@ -1756,6 +1756,132 @@ paintDeals();
 (function(){ try{ const p=new URLSearchParams(location.search).get('s'); if(!p) return; const S=JSON.parse(decodeURIComponent(escape(atob(p)))); if(S&&S.tab&&!outdated(S)){ fillForm(S); showResults(S,{save:false,scroll:true}); } }catch(e){} })();
 
 </script>
+<!-- =========================================================
+     MAGTravel · VUELO + HOTEL
+     Pega TODO este bloque justo antes de </body> en tu index.html
+     (después del </script> que ya tienes). No hay que tocar nada más.
+     ========================================================= -->
+<style>
+.combo-toggle{display:flex; align-items:center; gap:.55rem; margin-top:.9rem; padding:.7rem .9rem; border:1px dashed var(--line); border-radius:12px; background:var(--surface2); cursor:pointer; font-weight:800; font-size:.92rem;}
+.combo-toggle input{width:18px; height:18px; accent-color:var(--teal); flex:0 0 auto;}
+.combo-toggle small{color:var(--muted); font-weight:600;}
+.combo-box{margin-top:.6rem; padding:.9rem; border:1px solid var(--line); border-radius:12px; background:var(--surface2);}
+.combo-box[hidden]{display:none;}
+.combo-city{font-size:.88rem; color:var(--muted); margin:0 0 .6rem;}
+.combo-city b{color:var(--ink);}
+.fields.combo{grid-template-columns:minmax(0,2fr) minmax(148px,1fr) minmax(148px,1fr) minmax(175px,1.2fr);}
+@media (max-width:980px){ .fields.combo{grid-template-columns:1fr 1fr;} .fields.combo .span2{grid-column:1/-1;} }
+@media (max-width:460px){ .fields.combo{grid-template-columns:1fr;} }
+.combo-card{padding:1.1rem 1.2rem; margin-bottom:.8rem; border:2px solid var(--teal);}
+.combo-card h3{margin:.15rem 0 .2rem; font-size:1.2rem; font-weight:800;}
+.combo-card .meta{color:var(--muted); font-size:.9rem; margin:0 0 .8rem;}
+.combo-card .btns{display:flex; flex-wrap:wrap; gap:.5rem;}
+.combo-card .note{margin:.8rem 0 0; font-size:.78rem; color:var(--muted);}
+@media (max-width:520px){ .combo-card .gobook{width:100%; justify-content:center;} }
+</style>
+<script>
+(function(){
+  const panel = $('p-vuelos'); if(!panel) return;
 
+  /* ---------- 1. Casilla «Añadir hotel» y sus campos ---------- */
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <label class="combo-toggle"><input type="checkbox" id="o-hotel">
+      <span>Añadir hotel <small>· vuelo + hotel, cada uno se reserva en su web</small></span></label>
+    <div class="combo-box" id="comboBox" hidden>
+      <p class="combo-city" id="comboCity"></p>
+      <div class="fields combo">
+        <div class="field"><label for="hx-zone">Zona o barrio (opcional)</label><input id="hx-zone" placeholder="Ej.: centro, Trastevere, cerca de la playa" autocomplete="off"></div>
+        <div class="field"><label for="hx-d1">Entrada</label><input id="hx-d1" type="date"></div>
+        <div class="field"><label for="hx-d2">Salida</label><input id="hx-d2" type="date"></div>
+        <div class="field pax span2" id="paxX"></div>
+      </div>
+    </div>`;
+  panel.querySelector('.opts').after(wrap);
+
+  const chk = $('o-hotel'), box = $('comboBox');
+  const paxX = paxWidget($('paxX'), {kids:true, infants:false, rooms:true, init:{ad:2}});
+  let touchedDates = false, touchedPax = false;
+  $('hx-d1').min = iso(TODAY);
+
+  // Destino y fechas del (último) trayecto del vuelo
+  function lastLeg(){
+    if(trip() !== 'mc') return {to:SEL['f-to'], d1:$('f-d1').value, d2: trip()==='rt' ? $('f-d2').value : ''};
+    const rows = [...$('legs').children], r = rows[rows.length-1]; if(!r) return {};
+    const ins = r.querySelectorAll('input'); return {to:SEL[ins[1].id], d1:ins[2].value, d2:''};
+  }
+  // Entrada = día que llega el vuelo; salida = día de vuelta (o +3 noches si es solo ida)
+  function syncDates(){
+    if(touchedDates) return; const L = lastLeg(); if(!L.d1) return;
+    $('hx-d1').value = L.d1;
+    $('hx-d2').value = L.d2 && L.d2 > L.d1 ? L.d2 : addDays(L.d1, 3);
+    $('hx-d2').min = addDays(L.d1, 1);
+  }
+  function syncCity(){
+    const L = lastLeg(), typed = $('f-to').value.trim();
+    if(L.to && L.to.kind === 'explore'){ $('comboCity').textContent = 'Para añadir hotel, elige un destino concreto (no «Cualquier destino»).'; return; }
+    const c = L.to ? destCity(L.to) : typed;
+    $('comboCity').innerHTML = c ? `Hotel en <b>${esc(c)}</b>, la ciudad de destino de tu vuelo.` : 'El hotel se buscará en la ciudad de destino de tu vuelo.';
+  }
+  function syncPax(){ if(touchedPax) return; const p = paxFlight.get(); paxX.set({ad:p.ad, ch:p.ch}); }
+
+  chk.onchange = () => { box.hidden = !chk.checked; if(chk.checked){ syncDates(); syncCity(); syncPax(); } };
+  ['hx-d1','hx-d2'].forEach(id => $(id).addEventListener('change', () => {
+    touchedDates = true; const a = $('hx-d1').value; if(!a) return;
+    $('hx-d2').min = addDays(a, 1); if(!$('hx-d2').value || $('hx-d2').value <= a) $('hx-d2').value = addDays(a, 1);
+  }));
+  $('paxX').addEventListener('click', e => { if(e.target.closest('.step')) touchedPax = true; });
+  // Cuando cambian el vuelo, las fechas, el destino o los pasajeros, el hotel se actualiza solo
+  panel.addEventListener('change', e => { const t = e.target; if(!t.id.startsWith('hx-') && (t.type==='date' || t.name==='trip')) syncDates(); });
+  panel.addEventListener('picked', syncCity, true);
+  panel.addEventListener('input', e => { if(e.target.dataset.mode) syncCity(); });
+  panel.addEventListener('click', e => { if(e.target.closest('.step') && !e.target.closest('#paxX')) setTimeout(syncPax); });
+
+  /* ---------- 2. Tarjeta del hotel en los resultados ---------- */
+  function hotelCard(S){
+    const T = S.legs[S.legs.length-1].to; const H = S.hotel;
+    if(!H || !T || T.kind === 'explore' || !H.d1) return;
+    const d1 = H.d1, d2 = H.d2 && H.d2 > d1 ? H.d2 : addDays(d1, 1);
+    const city = destCity(T), place = H.zone ? `${H.zone}, ${city}` : city;
+    const all = hotelProviders({to:{city:place, country:T.country||''}, d1, d2, pax:H.pax});
+    let list = all.filter(p => p.aff); if(!list.length) list = all.slice(0, 1);
+    const n = Math.round((new Date(d2) - new Date(d1)) / 864e5), g = H.pax.ad + H.pax.ch;
+    const el = document.createElement('div'); el.className = 'card combo-card'; el.id = 'comboCard';
+    el.innerHTML = `<div class="eyebrow">Vuelo + hotel · paso 2</div><h3>Hoteles en ${esc(place)}</h3>
+      <p class="meta">${fmt(d1)} – ${fmt(d2)} · ${n} ${n===1?'noche':'noches'} · ${g} ${g===1?'huésped':'huéspedes'} · ${H.pax.rooms} ${H.pax.rooms>1?'habitaciones':'habitación'}</p>
+      <div class="btns">${list.map(p => `<a class="gobook alt" href="${esc(p.url)}" target="_blank" rel="noopener${p.aff?' sponsored':''}">Ver hoteles en ${esc(p.n)} ${ICO.ext}</a>`).join('')}</div>
+      <p class="note">El vuelo y el hotel se reservan por separado, cada uno en su web y con sus propias condiciones. MAGTravel no vende paquetes.</p>`;
+    const w = $('tpWidgets'), first = w.querySelector('.realp');
+    if(first) first.after(el); else w.prepend(el);
+  }
+
+  // Engancha la búsqueda: si la casilla está marcada, el hotel viaja con la búsqueda (enlace compartido y recientes incluidos)
+  const origShow = showResults;
+  showResults = function(S, o = {}){
+    if(S && S.tab === 'vuelos' && o.save !== false){
+      if(chk.checked){ syncDates(); S.hotel = {zone:$('hx-zone').value.trim(), d1:$('hx-d1').value, d2:$('hx-d2').value, pax:paxX.get()}; }
+      else delete S.hotel;
+    }
+    const r = origShow(S, o);
+    if(S && S.tab === 'vuelos' && S.hotel) hotelCard(S);
+    return r;
+  };
+
+  // Al abrir una búsqueda reciente o compartida, marca la casilla y rellena el hotel
+  function applyHotel(S){
+    if(!S || S.tab !== 'vuelos') return;
+    chk.checked = !!S.hotel; box.hidden = !S.hotel;
+    if(S.hotel){ $('hx-zone').value = S.hotel.zone||''; $('hx-d1').value = S.hotel.d1; $('hx-d2').value = S.hotel.d2; paxX.set(S.hotel.pax); touchedDates = touchedPax = true; syncCity(); }
+  }
+  const origFill = fillForm;
+  fillForm = function(S){ origFill(S); applyHotel(S); };
+  const origLabel = recentLabel;
+  recentLabel = S => origLabel(S) + (S.tab === 'vuelos' && S.hotel ? ' + hotel' : '');
+  paintRecent();
+
+  // Si la página se abrió desde un enlace compartido con hotel
+  if(current && current.tab === 'vuelos' && current.hotel){ applyHotel(current); if(!$('comboCard')) hotelCard(current); }
+})();
+</script>
 </body>
 </html>
